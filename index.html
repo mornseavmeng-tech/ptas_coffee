@@ -5,23 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>PTAS COFFEE POS</title>
   
+  <!-- ភ្ជាប់ FontAwesome សម្រាប់ Icon -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Dangrek&family=Koulen&display=swap');
     
-    * { 
-      touch-action: manipulation; 
-      -webkit-tap-highlight-color: transparent; 
-      user-select: none;
-    }
+    * { touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; }
     
-    :root {
-      --primary: #0056b3; --bg: #f4f6f9; --card-bg: #ffffff; --text: #333; --danger: #dc3545; --border: #e0e0e0;
-    }
+    :root { --primary: #0056b3; --bg: #f4f6f9; --card-bg: #ffffff; --text: #333; --danger: #dc3545; --border: #e0e0e0; }
     body { font-family: 'Dangrek', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; height: 100vh; overflow: hidden; }
     button, input, .tab, .nav-btn { font-family: 'Dangrek', sans-serif; }
     h1, h2, h3, h4, .logo, .price-tag, .total-row { font-family: 'Koulen', sans-serif; font-weight: normal; }
     
-    /* Splash Artboard 7 Screen */
     #splash-screen {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #0056b3;
       display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 99999;
@@ -29,10 +25,7 @@
     }
     .splash-logo { width: 180px; height: auto; margin-bottom: 25px; }
     .wave-dots { display: flex; gap: 8px; }
-    .wave-dots span {
-      width: 12px; height: 12px; background: white; border-radius: 50%;
-      animation: wave 1.2s infinite ease-in-out;
-    }
+    .wave-dots span { width: 12px; height: 12px; background: white; border-radius: 50%; animation: wave 1.2s infinite ease-in-out; }
     .wave-dots span:nth-child(2) { animation-delay: 0.2s; }
     .wave-dots span:nth-child(3) { animation-delay: 0.4s; }
     .wave-dots span:nth-child(4) { animation-delay: 0.6s; }
@@ -41,7 +34,10 @@
     .sidebar { width: 220px; background: var(--primary); color: white; display: flex; flex-direction: column; padding: 20px 0 20px 15px; box-sizing: border-box; overflow-y: auto; scrollbar-width: none; }
     .sidebar::-webkit-scrollbar { display: none; }
     .logo { font-size: 22px; font-weight: bold; text-align: center; margin-bottom: 30px; padding-right: 15px; }
-    .nav-btn { background: transparent; border: none; color: white; padding: 15px 20px; text-align: left; font-size: 16px; cursor: pointer; border-radius: 20px 0 0 20px; margin-bottom: 5px; transition: all 0.2s ease; width: 100%; box-sizing: border-box; }
+    
+    /* Sidebar Icons spacing */
+    .nav-btn { background: transparent; border: none; color: white; padding: 15px 20px; text-align: left; font-size: 16px; cursor: pointer; border-radius: 20px 0 0 20px; margin-bottom: 5px; transition: all 0.2s ease; width: 100%; box-sizing: border-box; display: flex; align-items: center; gap: 10px; }
+    .nav-btn i { font-size: 18px; width: 24px; text-align: center; }
     .nav-btn.active { background: var(--bg); color: var(--primary); font-weight: bold; box-shadow: -2px 2px 5px rgba(0,0,0,0.05); }
     .nav-btn:hover:not(.active) { background: rgba(255,255,255,0.1); }
 
@@ -49,7 +45,20 @@
     .order-layout { display: flex; flex: 1; gap: 20px; }
     .product-section { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
     
-    .cart-section { width: 350px; background: var(--card-bg); border-radius: 12px; padding: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; max-height: calc(100vh - 40px); position: sticky; top: 0; }
+    /* កែប្រែប្រព័ន្ធ Cart មិនឱ្យធ្លាក់ចុះក្រោម និង Scroll ស្រួល */
+    .cart-section { 
+      width: 350px; background: var(--card-bg); border-radius: 12px; padding: 15px; 
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; 
+      height: calc(100vh - 40px); /* ប្រើ Height ចងឱ្យស្មើអេក្រង់ជានិច្ច */
+      position: sticky; top: 0; box-sizing: border-box;
+    }
+    .cart-items { 
+      flex: 1; /* ពង្រីកយកកន្លែងដែលសល់ */
+      overflow-y: auto; /* បើក Scroll សម្រាប់តែទំនិញ */
+      -webkit-overflow-scrolling: touch; 
+      margin-top: 15px; border-top: 1px solid var(--border); padding-top: 10px; scrollbar-width: none; 
+    }
+    .cart-items::-webkit-scrollbar { display: none; }
 
     .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 10px; overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }
     .tabs::-webkit-scrollbar { display: none; }
@@ -63,7 +72,6 @@
     .old-price { text-decoration: line-through; color: rgba(220,53,69,0.5); font-size: 12px; margin-right: 5px; } 
 
     .table-input { width: 60px; padding: 5px; border: 1px solid var(--border); border-radius: 5px; text-align: center; font-weight: bold; user-select: text; }
-    .cart-items { flex: 1; overflow-y: auto; margin-top: 15px; border-top: 1px solid var(--border); padding-top: 10px; }
     .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 14px; }
     .qty-controls button { background: none; border: none; font-size: 22px; color: var(--primary); cursor: pointer; padding: 0 10px; }
     
@@ -77,9 +85,10 @@
     .pay-btn:active { transform: scale(0.95); opacity: 0.8; }
     
     .bank-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-    .form-box { background: white; padding: 20px; border-radius: 12px; max-width: 400px; margin: 0 auto; width: 100%; box-sizing: border-box; }
-    .form-box input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid var(--border); border-radius: 5px; box-sizing: border-box; user-select: text; }
-    .form-box button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+    .form-box { background: white; padding: 30px; border-radius: 12px; max-width: 450px; margin: auto; width: 100%; box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .form-box input { width: 100%; padding: 12px; margin: 10px 0 20px 0; border: 1px solid var(--border); border-radius: 5px; box-sizing: border-box; user-select: text; background: #f8f9fa; }
+    .form-box label { color: #666; font-size: 14px; }
+    .form-box button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
     
     .hist-card { border: 2px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 15px; cursor: pointer; display: flex; justify-content: space-between; transition: 0.2s; background: white; align-items: center;}
     .hist-card:hover { border-color: var(--primary); }
@@ -87,34 +96,64 @@
     .hist-card.active .text-muted { color: rgba(255,255,255,0.8) !important; }
     .hist-card.active .hist-status { color: white !important; }
     .text-muted { color: #888; font-size: 12px; }
-    
     .date-separator { background: rgba(0, 86, 179, 0.1); color: var(--primary); padding: 8px 15px; border-radius: 8px; margin: 15px 0 10px 0; font-family: 'Dangrek', sans-serif; font-size: 15px; text-align: center; }
+
+    /* Artboard 2: Drawer Modal សម្រាប់ប្រវត្តិចំណាយ (មាន Animation) */
+    .drawer-overlay { 
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
+      background: rgba(0,0,0,0.4); z-index: 9999; 
+      display: flex; justify-content: flex-end;
+      opacity: 0; visibility: hidden; transition: all 0.3s ease; 
+    }
+    .drawer-overlay.active { opacity: 1; visibility: visible; }
+    
+    .drawer-content { 
+      width: 450px; max-width: 90%; background: #ebf1f6; height: 100%; 
+      padding: 30px; box-sizing: border-box; display: flex; flex-direction: column; 
+      transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
+    }
+    .drawer-overlay.active .drawer-content { transform: translateX(0); }
+    
+    .exp-list-card { background: transparent; border: 1px solid #7c98b6; border-radius: 8px; padding: 15px 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+    .exp-list-card .exp-title { font-size: 18px; font-weight: bold; color: #333; }
+    .exp-list-card .exp-amount { font-size: 20px; font-weight: bold; font-family: 'Koulen'; color: #333; }
+    .exp-list-card .exp-time { font-size: 12px; color: #555; text-align: right; }
+
+    /* រៀបចំ Layout Responsive សម្រាប់ History និង Checkout លើ Tablet */
+    .hist-layout { display: flex; height: 100%; width: 100%; flex-direction: row; }
+    .hist-left-pane { flex: 1; padding: 20px; border-right: 1px solid var(--border); background: white; display: flex; flex-direction: column; min-height: 0; }
+    .hist-list-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-right: 10px; scrollbar-width: none; }
+    .hist-list-scroll::-webkit-scrollbar { display: none; }
+    .hist-right-pane { flex: 1.5; padding: 30px; background: var(--bg); overflow-y: auto; -webkit-overflow-scrolling: touch; min-height: 0; }
+
+    /* នៅពេលកាន់ Tablet បញ្ឈរ វានឹងរៀបជាទម្រង់ លើ-ក្រោម វិញដើម្បីកុំឱ្យកៀប */
+    @media (max-width: 900px) {
+      .hist-layout { flex-direction: column; }
+      .hist-left-pane { flex: none; height: 45%; border-right: none; border-bottom: 2px solid var(--border); }
+      .hist-right-pane { flex: 1; padding: 15px; }
+    }
   </style>
 </head>
 <body>
 
-  <!-- Splash Artboard 7 Screen -->
+  <!-- Splash Screen -->
   <div id="splash-screen">
     <img src="https://i.postimg.cc/Y9qXGCT1/3-(2).png" alt="PTAS Logo" class="splash-logo">
-    <div class="wave-dots">
-      <span></span><span></span><span></span><span></span>
-    </div>
+    <div class="wave-dots"><span></span><span></span><span></span><span></span></div>
   </div>
 
-  <!-- Sidebar -->
+  <!-- Sidebar មានបញ្ចូល Icon FontAwesome -->
   <div class="sidebar" id="app-sidebar" style="display:none;">
-    <div class="logo">
-      <img src="https://i.postimg.cc/Y9qXGCT1/3-(2).png" alt="PTAS COFFEE" style="width: 80%; max-width: 150px; height: auto; margin: 0 auto; display: block;">
-    </div>
-    <button class="nav-btn active" onclick="switchView('order')">អាហារ & ភេសជ្ជៈ</button>
-    <button class="nav-btn" onclick="switchView('history')">កាកម្មង់</button>
-    <button class="nav-btn" onclick="switchView('shift')">បិតវេន</button>
-    <button class="nav-btn" onclick="switchView('expense')">ចំណាយ</button>
-    <button class="nav-btn" id="btn-report" style="display:none; color: #ffc107;" onclick="switchView('report')">📊 របាយការណ៍</button>
-    <button class="nav-btn" id="btn-logout" style="color: #ff4d4d; margin-top: auto;" onclick="logout()">🚪 ចាកចេញ</button>
+    <div class="logo"><img src="https://i.postimg.cc/Y9qXGCT1/3-(2).png" alt="PTAS COFFEE" style="width: 80%; max-width: 150px; margin: 0 auto; display: block;"></div>
+    <button class="nav-btn active" onclick="switchView('order')"><i class="fa-solid fa-mug-hot"></i> អាហារ & ភេសជ្ជៈ</button>
+    <button class="nav-btn" onclick="switchView('history')"><i class="fa-solid fa-receipt"></i> កាកម្មង់</button>
+    <button class="nav-btn" onclick="switchView('shift')"><i class="fa-solid fa-user-xmark"></i> បិតវេន</button>
+    <button class="nav-btn" onclick="switchView('expense')"><i class="fa-solid fa-wallet"></i> ចំណាយ</button>
+    <button class="nav-btn" id="btn-report" style="display:none; color: #ffc107;" onclick="switchView('report')"><i class="fa-solid fa-chart-gantt"></i> របាយការណ៍</button>
+    <button class="nav-btn" id="btn-logout" style="color: #ff4d4d; margin-top: auto;" onclick="logout()"><i class="fa-solid fa-door-open"></i> ចាកចេញ</button>
   </div>
 
-  <!-- ផ្ទាំង១: Order UI -->
+  <!-- Main Views -->
   <div class="main-content" id="view-order" style="display:none;">
     <div class="order-layout">
       <div class="product-section">
@@ -136,18 +175,15 @@
           <div style="display:flex; justify-content:space-between; font-size:14px;"><span>សរុប:</span><span id="subtotal">0៛</span></div>
           <div style="display:flex; justify-content:space-between; font-size:14px; color:var(--danger);"><span>បញ្ចុះ:</span><span id="discount-amt">-0៛</span></div>
           <div class="total-row"><span>ត្រូវបង់:</span><span id="final-total">0៛</span></div>
-          <div style="margin-top: 20px;">
-            <button class="pay-btn" style="background:var(--primary); width:100%; padding: 15px; font-size: 18px; border-radius: 8px; color: white;" onclick="goToCheckout()">ទូទាត់លុយ</button>
-          </div>
+          <div style="margin-top: 20px;"><button class="pay-btn" style="background:var(--primary); width:100%; padding: 15px; font-size: 18px; border-radius: 8px; color: white;" onclick="goToCheckout()">ទូទាត់លុយ</button></div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ផ្ទាំង២: History -->
   <div class="main-content" id="view-history" style="display:none; padding:0;">
-    <div style="display:flex; height:100%; width:100%;">
-      <div style="flex:1; padding:20px; border-right:1px solid var(--border); background:white; display:flex; flex-direction:column;">
+    <div class="hist-layout">
+      <div class="hist-left-pane">
         <h2 style="margin:0 0 20px 0; font-size:28px;">កាកម្មង់</h2>
         <div style="position:relative; margin-bottom:20px;">
           <div style="cursor:pointer; display:inline-flex; align-items:center; gap:5px; font-weight:bold; color:var(--text);" onclick="toggleHistDropdown()">
@@ -160,28 +196,29 @@
             <div style="padding:10px; cursor:pointer; color:var(--danger);" onclick="filterHist('unpaid')">មិនទាន់ទូទាត់</div>
           </div>
         </div>
-        <div id="history-list" style="overflow-y:auto; flex:1; padding-right:10px;"></div>
+        <div id="history-list" class="hist-list-scroll"></div>
       </div>
-      <div style="flex:1.5; padding:30px; background:var(--bg); overflow-y:auto;" id="history-details-pane">
+      <div class="hist-right-pane" id="history-details-pane">
          <div style="text-align:center; color:#999; margin-top:50px;">សូមជ្រើសរើសវិក្កយបត្រនៅខាងឆ្វេង ដើម្បីមើលព័ត៌មានលម្អិត</div>
       </div>
     </div>
   </div>
 
-  <!-- ផ្ទាំង៣: Shift -->
   <div class="main-content" id="view-shift" style="display:none; justify-content:center; align-items:center;">
     <div class="form-box" style="text-align:center;">
-      <h2>បិទវេនប្រចាំថ្ងៃ</h2>
-      <p>នេះក្រាន់តែជាកាដាក់ឲប្រើបណ្ដោះអាសន្នសិន បើមានបញ្ហារសូមទាក់ទងមកខ្ញុំ</p>
+      <h2 style="margin-top:0;"><i class="fa-solid fa-user-xmark" style="color:var(--danger); margin-right:10px;"></i>បិទវេនប្រចាំថ្ងៃ</h2>
+      <p style="color:#666; margin-bottom:30px;">ការបិទវេនអាចធ្វើបានតែ ១ ដងក្នុងមួយថ្ងៃ និងពេលមានទំនិញលក់បានប៉ុណ្ណោះ។</p>
       <button class="pay-btn" onclick="closeShift()" style="background:var(--danger); padding:15px; font-size:18px; width:100%;">បិទវេនឥឡូវនេះ</button>
     </div>
   </div>
 
-  <!-- ផ្ទាំង៤: Expense -->
-  <div class="main-content" id="view-expense" style="display:none; justify-content:center; align-items:center; position:relative;">
-    <button onclick="showExpenseHistory()" style="position:absolute; top:20px; right:20px; background:var(--primary); color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; font-family:'Dangrek';">📋 មើលបញ្ជីចំណាយ</button>
+  <!-- Artboard 1: ផ្ទាំងកត់ត្រាចំណាយ -->
+  <div class="main-content" id="view-expense" style="display:none; justify-content:center; align-items:center; position:relative; background-color: #ebf1f6;">
+    <button onclick="toggleExpenseDrawer()" style="position:absolute; top:20px; right:20px; background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-family:'Dangrek'; font-size:16px; display:flex; align-items:center; gap:8px;">
+      <i class="fa-solid fa-clock-rotate-left"></i> មើលប្រវត្តិចំណាយ
+    </button>
     <div class="form-box">
-      <h2>💸 កត់ត្រាចំណាយ</h2>
+      <h2 style="text-align:center; margin-top:0; color:#333;"><i class="fa-solid fa-receipt" style="color:#28a745; margin-right:10px;"></i>កត់ត្រាចំណាយ</h2>
       <label>ឈ្មោះចំណាយ (ឧ. ទិញទឹកកក)៖</label>
       <input type="text" id="exp-name" placeholder="វាយបញ្ចូលឈ្មោះចំណាយ...">
       <label>តម្លៃ (រៀល)៖</label>
@@ -190,16 +227,45 @@
     </div>
   </div>
 
-  <!-- ផ្ទាំង៥: Report -->
+  <!-- Artboard 2: Modal Drawer សម្រាប់បញ្ជីចំណាយ -->
+  <div id="expense-drawer" class="drawer-overlay">
+    <div class="drawer-content">
+       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 30px;">
+          <i class="fa-solid fa-xmark" style="font-size:28px; cursor:pointer; color:#7c98b6;" onclick="toggleExpenseDrawer()"></i>
+       </div>
+       <h1 style="font-size:36px; margin:0 0 30px 0; color:#333; font-family:'Koulen';">កំណត់ត្រាចំណាយ</h1>
+       <div id="expense-list-content" style="overflow-y:auto; flex:1; -webkit-overflow-scrolling: touch; scrollbar-width: none;"></div>
+    </div>
+  </div>
+
   <div class="main-content" id="view-report" style="display:none; justify-content:center; align-items:center;">
-    <div class="form-box" style="text-align:center; max-width:500px;">
-      <h2>📊 របាយការណ៍ហាង</h2>
-      <p>សូមមើលរបាយការណ៍លម្អិតប្រចាំខែនៅក្នុង Google Sheets ផ្ទាល់។</p>
+    <div class="form-box" style="text-align:center;">
+      <h2 style="margin-top:0;"><i class="fa-solid fa-chart-gantt" style="color:var(--primary); margin-right:10px;"></i>របាយការណ៍ហាង</h2>
+      <p style="color:#666; margin-bottom:30px;">សូមមើលរបាយការណ៍លម្អិតប្រចាំខែនៅក្នុង Google Sheets ផ្ទាល់។</p>
       <button class="pay-btn" onclick="window.open('https://docs.google.com/spreadsheets/d/1f0arf668BIlKC7J_SmtZL0ZE9Bd7ADx2ETVf3snrlw0/edit', '_blank')" style="background:var(--primary); padding:15px; font-size:18px;">បើក Google Sheets</button>
     </div>
   </div>
 
-  <!-- Checkout View -->
+  <div class="main-content" id="view-checkout" style="display:none; padding:0;">
+    <div class="hist-layout">
+      <div class="hist-left-pane">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+           <h2 style="margin:0; cursor:pointer; color:var(--text); display:flex; align-items:center; gap:10px;" onclick="switchView('order')">
+             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg> ទូទាត់លុយ
+           </h2>
+           <h2 style="margin:0; color:var(--primary);" id="checkout-total">0៛</h2>
+        </div>
+        <button class="pay-btn" style="width:100%; margin-bottom:15px; background:var(--primary); color:white;" onclick="selectPayMethod('cash')">លុយក្រៅ</button>
+        <button class="pay-btn" style="width:100%; margin-bottom:15px; background:white; color:var(--primary); border:1px solid var(--primary);" onclick="selectPayMethod('mix')">លុយក្រៅ & QR</button>
+        <button class="pay-btn" style="width:100%; margin-bottom:15px; background-color: #d0021b; color:white; display:flex; justify-content:center; align-items:center; gap:10px;" onclick="selectPayMethod('qr')">
+            <img src="https://i.postimg.cc/3wbmKjQH/qr.png" alt="QR" style="height: 28px;"> QR
+        </button>
+        <button class="pay-btn" style="width:100%; background:var(--text); color:white; margin-top:30px;" onclick="processFinalCheckout('មិនទាន់ទូទាត់')">មិនទាន់ទូទាត់</button>
+      </div>
+      <div class="hist-right-pane" id="checkout-right-pane"></div>
+    </div>
+  </div>
+
   <div class="main-content" id="view-checkout" style="display:none; padding:0;">
     <div style="display:flex; height:100%; width:100%;">
       <div style="flex:1; padding:20px; border-right:1px solid var(--border); background:white;">
@@ -221,226 +287,119 @@
   </div>
 
   <script>
-    // ⚠️ ដាក់ URL ថ្មីនៅទីនេះ
-    const API_URL = "https://script.google.com/macros/s/AKfycbxKfvs9Hpas32ZdNC2FPRdhlSK-7fuOHcSIrFMt2ykwPUavfsb-Q5mdje8jQTQNNRcQ/exec";
+    // ⚠️ បញ្ជាក់៖ Link នេះម៉េងបានដូរត្រូវរួចហើយ
+    const API_URL = "https://script.google.com/macros/s/AKfycbxHvO7kQpt6yaT_AOkw7AkH8SglFcrMm0V7fKJeOxpce49GlYqYmbf-9WYnuLivO3n4/exec";
 
     let MENU_DB = {}; let PROMO_DB = {}; let UNPAID_DB = []; let HISTORY_DB = []; let EXPENSE_DB = []; let ALL_HISTORY = [];
     let cart = []; let currentCat = ""; let appliedPromo = null; let currentEditingInv = null; let currentHistFilter = 'all';
     
     const MANAGER_PIN = "9999"; const STAFF_PIN = "1234";
-
     const BANKS = [
-      { name: 'ABA', color: '#005e7a', image: 'https://i.postimg.cc/gkfVhHn4/aba.jpg' },
-      { name: 'អេស៊ីលីដា', color: '#143c6d', image: 'https://i.postimg.cc/rpT5nyGb/ac.png' },
-      { name: 'វឌ្ឍនៈ', color: '#013bc2', image: 'https://i.postimg.cc/NGnmhk71/vattanak.png' },
-      { name: 'ស្ថាបនា', color: '#093b80', image: 'https://i.postimg.cc/J0SkbR4k/sathapana.png' },
-      { name: 'Amret', color: '#0c8242', image: 'https://i.postimg.cc/LXCf8zcy/amret.png' },
-      { name: 'Wing Bank', color: '#acd038', image: 'https://i.postimg.cc/mgYHHfxF/wing.jpg' },
+      { name: 'ABA', color: '#005e7a', image: 'https://i.postimg.cc/gkfVhHn4/aba.jpg' }, { name: 'អេស៊ីលីដា', color: '#143c6d', image: 'https://i.postimg.cc/rpT5nyGb/ac.png' },
+      { name: 'វឌ្ឍនៈ', color: '#013bc2', image: 'https://i.postimg.cc/NGnmhk71/vattanak.png' }, { name: 'ស្ថាបនា', color: '#093b80', image: 'https://i.postimg.cc/J0SkbR4k/sathapana.png' },
+      { name: 'Amret', color: '#0c8242', image: 'https://i.postimg.cc/LXCf8zcy/amret.png' }, { name: 'Wing Bank', color: '#acd038', image: 'https://i.postimg.cc/mgYHHfxF/wing.jpg' },
       { name: 'Woori Bank', color: '#1472af', image: 'https://i.postimg.cc/jjRJ6gtV/woori.jpg' }
     ];
 
     function showCustomAlert(msg, callback) {
-      let overlay = document.createElement('div');
-      overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:10000;';
-      let box = document.createElement('div');
-      box.style.cssText = 'background:white; padding:25px; border-radius:12px; text-align:center; width:80%; max-width:320px; box-shadow:0 5px 15px rgba(0,0,0,0.2);';
+      let overlay = document.createElement('div'); overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:10000;';
+      let box = document.createElement('div'); box.style.cssText = 'background:white; padding:25px; border-radius:12px; text-align:center; width:80%; max-width:320px; box-shadow:0 5px 15px rgba(0,0,0,0.2);';
       box.innerHTML = `<p style="font-family:'Dangrek'; font-size:18px; color:#333; margin-bottom:20px; line-height:1.5; white-space:pre-line; text-align:left;">${msg}</p>`;
-      let btn = document.createElement('button');
-      btn.style.cssText = 'background:var(--primary); color:white; border:none; padding:12px 30px; border-radius:8px; font-family:"Dangrek"; font-size:18px; cursor:pointer; width:100%;';
-      btn.innerText = 'យល់ព្រម (OK)';
-      btn.onclick = function() { document.body.removeChild(overlay); if(callback) callback(); };
+      let btn = document.createElement('button'); btn.style.cssText = 'background:var(--primary); color:white; border:none; padding:12px 30px; border-radius:8px; font-family:"Dangrek"; font-size:18px; cursor:pointer; width:100%;';
+      btn.innerText = 'យល់ព្រម (OK)'; btn.onclick = function() { document.body.removeChild(overlay); if(callback) callback(); };
       box.appendChild(btn); overlay.appendChild(box); document.body.appendChild(overlay);
     }
 
     function showCustomConfirm(msg, callback) {
-      let overlay = document.createElement('div');
-      overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:10000;';
-      let box = document.createElement('div');
-      box.style.cssText = 'background:white; padding:25px; border-radius:12px; text-align:center; width:80%; max-width:300px; box-shadow:0 5px 15px rgba(0,0,0,0.2);';
+      let overlay = document.createElement('div'); overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:10000;';
+      let box = document.createElement('div'); box.style.cssText = 'background:white; padding:25px; border-radius:12px; text-align:center; width:80%; max-width:300px; box-shadow:0 5px 15px rgba(0,0,0,0.2);';
       box.innerHTML = `<p style="font-family:'Dangrek'; font-size:20px; color:#333; margin-bottom:20px;">${msg}</p>`;
       let btnGroup = document.createElement('div'); btnGroup.style.cssText = 'display:flex; gap:10px; justify-content:center;';
-      let btnYes = document.createElement('button');
-      btnYes.style.cssText = 'flex:1; background:var(--danger); color:white; border:none; padding:10px; border-radius:8px; font-family:"Dangrek"; font-size:16px; cursor:pointer;';
-      btnYes.innerText = 'យល់ព្រម'; btnYes.onclick = function() { document.body.removeChild(overlay); if(callback) callback(); };
-      let btnNo = document.createElement('button');
-      btnNo.style.cssText = 'flex:1; background:#6c757d; color:white; border:none; padding:10px; border-radius:8px; font-family:"Dangrek"; font-size:16px; cursor:pointer;';
-      btnNo.innerText = 'បោះបង់'; btnNo.onclick = function() { document.body.removeChild(overlay); };
+      let btnYes = document.createElement('button'); btnYes.style.cssText = 'flex:1; background:var(--danger); color:white; border:none; padding:10px; border-radius:8px; font-family:"Dangrek"; font-size:16px; cursor:pointer;'; btnYes.innerText = 'យល់ព្រម'; btnYes.onclick = function() { document.body.removeChild(overlay); if(callback) callback(); };
+      let btnNo = document.createElement('button'); btnNo.style.cssText = 'flex:1; background:#6c757d; color:white; border:none; padding:10px; border-radius:8px; font-family:"Dangrek"; font-size:16px; cursor:pointer;'; btnNo.innerText = 'បោះបង់'; btnNo.onclick = function() { document.body.removeChild(overlay); };
       btnGroup.appendChild(btnNo); btnGroup.appendChild(btnYes); box.appendChild(btnGroup); overlay.appendChild(box); document.body.appendChild(overlay);
     }
 
     async function sendDataToCloud(payload, loadingMsg) {
       try {
-        let res = await fetch(API_URL, {
-          method: 'POST',
-          headers: {'Content-Type': 'text/plain;charset=utf-8'},
-          body: JSON.stringify(payload)
-        });
+        let res = await fetch(API_URL, { method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify(payload) });
         let result = await res.json();
-        if(result.status === 'success') {
-          showCustomAlert(result.message, function() {
-              if(payload.action === 'close_shift') location.reload();
-          });
-        } else {
-          showCustomAlert("❌ កំហុសបច្ចេកទេស: " + result.message);
-        }
-      } catch(e) {
-        showCustomAlert("❌ បរាជ័យក្នុងការភ្ជាប់ទៅកាន់ Server!");
-      }
+        if(result.status === 'success') { showCustomAlert(result.message, function() { if(payload.action === 'close_shift') location.reload(); }); } 
+        else { showCustomAlert("❌ កំហុសបច្ចេកទេស: " + result.message); }
+      } catch(e) { showCustomAlert("❌ បរាជ័យក្នុងការភ្ជាប់ទៅកាន់ Server!"); }
     }
 
     function getFormattedDate() {
       const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      let d = new Date(); 
-      let day = d.getDate();
-      let paddedDay = day < 10 ? "0" + day : day; // បន្ថែមលេខ 0 ពីមុខបើថ្ងៃក្រោម ១០ (ឧ. 1 ទៅជា 01)
-      return paddedDay + "," + months[d.getMonth()] + "," + String(d.getFullYear()).slice(-2);
+      let d = new Date(); let day = d.getDate(); let padDay = day < 10 ? '0' + day : day; 
+      return padDay + "," + months[d.getMonth()] + "," + String(d.getFullYear()).slice(-2);
     }
 
     window.onload = async function() {
       try {
-        let res = await fetch(API_URL);
-        let data = await res.json();
+        let res = await fetch(API_URL); let data = await res.json();
         MENU_DB = data.menuData || {}; PROMO_DB = data.promoData || {}; UNPAID_DB = data.unpaidData || []; HISTORY_DB = data.historyData || []; EXPENSE_DB = data.expenseData || [];
+        
         let todayDate = getFormattedDate();
-        ALL_HISTORY = [...UNPAID_DB.map(x => ({...x, status: 'មិនទាន់ទូទាត់', date: todayDate})), ...HISTORY_DB.map(x => ({...x, status: 'បានទូទាត់', date: x.date || todayDate}))];
+        ALL_HISTORY = [...UNPAID_DB.map(x => ({...x, status: 'មិនទាន់ទូទាត់', date: x.date || todayDate})), ...HISTORY_DB.map(x => ({...x, status: 'បានទូទាត់', date: x.date || todayDate}))];
+        
+        ALL_HISTORY.forEach(inv => {
+            let d = inv.date;
+            if (!d || d.includes("AM") || d.includes("PM") || d.includes(":")) { inv.date = todayDate; } 
+            else { let parts = d.split(","); if (parts.length === 3 && parts[0].trim().length === 1) { inv.date = "0" + parts[0].trim() + "," + parts[1] + "," + parts[2]; } }
+        });
         
         setTimeout(() => {
-          let splash = document.getElementById('splash-screen');
-          splash.style.opacity = '0';
-          setTimeout(() => splash.remove(), 600);
-          initAuth();
+          let splash = document.getElementById('splash-screen'); splash.style.opacity = '0';
+          setTimeout(() => splash.remove(), 600); initAuth();
         }, 1200);
       } catch(e) { showCustomAlert("⚠️ មិនអាចទាញយកទិន្នន័យបានទេ! សូម Refresh ឡើងវិញ។"); }
     };
 
-    function initAuth() {
-      let userRole = localStorage.getItem('ptas_role');
-      if (!userRole) { showLoginScreen(); } else { buildAppUI(userRole); }
-    }
-
+    function initAuth() { let userRole = localStorage.getItem('ptas_role'); if (!userRole) { showLoginScreen(); } else { buildAppUI(userRole); } }
     function showLoginScreen() {
-      let loginDiv = document.createElement('div');
-      loginDiv.id = 'login-screen';
-      loginDiv.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:var(--bg); display:flex; justify-content:center; align-items:center; z-index:9999; flex-direction:column;';
-      loginDiv.innerHTML = `
-        <div style="background:white; padding:40px; border-radius:15px; box-shadow:0 4px 15px rgba(0,0,0,0.1); text-align:center;">
-            <img src="https://i.postimg.cc/Y9qXGCT1/3-(2).png" style="width:100px; margin-bottom:20px;">
-            <h2 style="font-family:'Dangrek'; color:var(--text); margin-bottom:20px;">សូមបញ្ចូលលេខកូដសម្ងាត់</h2>
-            <input type="password" id="pin-input" onkeypress="if(event.key === 'Enter') checkPin()" style="padding:15px; font-size:24px; text-align:center; border-radius:8px; border:1px solid var(--border); width:200px; margin-bottom:15px; font-family:Arial; letter-spacing: 5px;" placeholder="****">
-            <br>
-            <button onclick="checkPin()" style="background:var(--primary); color:white; border:none; padding:12px 40px; font-size:18px; border-radius:8px; font-family:'Dangrek'; cursor:pointer; width: 100%; box-sizing: border-box;">ចូលប្រព័ន្ធ (Login)</button>
-        </div>`;
+      let loginDiv = document.createElement('div'); loginDiv.id = 'login-screen'; loginDiv.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:var(--bg); display:flex; justify-content:center; align-items:center; z-index:9999; flex-direction:column;';
+      loginDiv.innerHTML = `<div style="background:white; padding:40px; border-radius:15px; box-shadow:0 4px 15px rgba(0,0,0,0.1); text-align:center;"><img src="https://i.postimg.cc/Y9qXGCT1/3-(2).png" style="width:100px; margin-bottom:20px;"><h2 style="font-family:'Dangrek'; color:var(--text); margin-bottom:20px;">សូមបញ្ចូលលេខកូដសម្ងាត់</h2><input type="password" id="pin-input" onkeypress="if(event.key === 'Enter') checkPin()" style="padding:15px; font-size:24px; text-align:center; border-radius:8px; border:1px solid var(--border); width:200px; margin-bottom:15px; font-family:Arial; letter-spacing: 5px;" placeholder="****"><br><button onclick="checkPin()" style="background:var(--primary); color:white; border:none; padding:12px 40px; font-size:18px; border-radius:8px; font-family:'Dangrek'; cursor:pointer; width: 100%; box-sizing: border-box;">ចូលប្រព័ន្ធ (Login)</button></div>`;
       document.body.appendChild(loginDiv);
     }
-
-    function checkPin() {
-      let pin = document.getElementById('pin-input').value;
-      if (pin === MANAGER_PIN) { localStorage.setItem('ptas_role', 'manager'); document.getElementById('login-screen').remove(); buildAppUI('manager'); } 
-      else if (pin === STAFF_PIN) { localStorage.setItem('ptas_role', 'staff'); document.getElementById('login-screen').remove(); buildAppUI('staff'); } 
-      else { showCustomAlert("❌ លេខកូដមិនត្រឹមត្រូវទេ!"); }
-    }
-
+    function checkPin() { let pin = document.getElementById('pin-input').value; if (pin === MANAGER_PIN) { localStorage.setItem('ptas_role', 'manager'); document.getElementById('login-screen').remove(); buildAppUI('manager'); } else if (pin === STAFF_PIN) { localStorage.setItem('ptas_role', 'staff'); document.getElementById('login-screen').remove(); buildAppUI('staff'); } else { showCustomAlert("❌ លេខកូដមិនត្រឹមត្រូវទេ!"); } }
     function logout() { showCustomConfirm("តើអ្នកពិតជាចង់ចាកចេញមែនទេ?", function() { localStorage.removeItem('ptas_role'); document.getElementById('app-sidebar').style.display = 'none'; document.getElementById('view-order').style.display = 'none'; showLoginScreen(); }); }
 
     function buildAppUI(role) {
-      document.getElementById('app-sidebar').style.display = 'flex'; document.getElementById('view-order').style.display = 'flex';
-      if (role === 'manager') document.getElementById('btn-report').style.display = 'block';
-      currentCat = Object.keys(MENU_DB)[0]; let tabsHtml = '';
-      for (let cat in MENU_DB) tabsHtml += `<div class="tab ${cat===currentCat?'active':''}" onclick="loadCat('${cat}')">${cat}</div>`;
-      document.getElementById('category-tabs').innerHTML = tabsHtml; loadCat(currentCat); renderHistoryList();
+      document.getElementById('app-sidebar').style.display = 'flex'; document.getElementById('view-order').style.display = 'flex'; if (role === 'manager') document.getElementById('btn-report').style.display = 'block';
+      currentCat = Object.keys(MENU_DB)[0]; let tabsHtml = ''; for (let cat in MENU_DB) tabsHtml += `<div class="tab ${cat===currentCat?'active':''}" onclick="loadCat('${cat}')">${cat}</div>`; document.getElementById('category-tabs').innerHTML = tabsHtml; loadCat(currentCat); renderHistoryList();
       let savedCart = localStorage.getItem('ptas_cart'); let savedTable = localStorage.getItem('ptas_table'); let savedEditing = localStorage.getItem('ptas_editing');
       if (savedCart) { cart = JSON.parse(savedCart); if (savedTable) document.getElementById('table-no').value = savedTable; if (savedEditing) currentEditingInv = savedEditing; updateCart(); }
     }
 
     function loadCat(cat) {
-      currentCat = cat; document.querySelectorAll('#category-tabs .tab').forEach(t => t.classList.remove('active')); if(event && event.target.classList) event.target.classList.add('active');
-      let html = '';
-      for (let sub in MENU_DB[cat].subcategories) {
-        MENU_DB[cat].subcategories[sub].forEach(i => {
-          let saleP = i.price - (i.discount || 0); let pUI = i.discount > 0 ? `<span class="old-price">${i.price}៛</span>${saleP}៛` : `${i.price}៛`;
-          let imgUI = i.image ? `<img src="${i.image}" loading="lazy" style="width:100%; height:120px; object-fit:contain; margin-bottom:10px;">` : ``;
-          html += `<div class="product-card" onclick="addToCart('${i.name}', ${saleP})">${imgUI}<h4 style="margin:5px 0;">${i.name}</h4><div class="price-tag">${pUI}</div></div>`;
-        });
-      }
+      currentCat = cat; document.querySelectorAll('#category-tabs .tab').forEach(t => t.classList.remove('active')); if(event && event.target.classList) event.target.classList.add('active'); let html = '';
+      for (let sub in MENU_DB[cat].subcategories) { MENU_DB[cat].subcategories[sub].forEach(i => { let saleP = i.price - (i.discount || 0); let pUI = i.discount > 0 ? `<span class="old-price">${i.price}៛</span>${saleP}៛` : `${i.price}៛`; let imgUI = i.image ? `<img src="${i.image}" loading="lazy" style="width:100%; height:120px; object-fit:contain; margin-bottom:10px;">` : ``; html += `<div class="product-card" onclick="addToCart('${i.name}', ${saleP})">${imgUI}<h4 style="margin:5px 0;">${i.name}</h4><div class="price-tag">${pUI}</div></div>`; }); }
       document.getElementById('product-grid').innerHTML = html;
     }
 
     function addToCart(name, price) { let ex = cart.find(i => i.name === name); if(ex) ex.qty++; else cart.push({name, price, qty:1}); updateCart(); }
     function changeQty(idx, val) { cart[idx].qty += val; if(cart[idx].qty <= 0) cart.splice(idx, 1); updateCart(); }
-    
     function updateCart() {
-      let sub = 0; let html = '';
-      cart.forEach((i, idx) => { sub += i.price * i.qty; html += `<div class="cart-item"><div style="flex:1">${i.name}<br><small>${i.price}៛</small></div><div class="qty-controls"><button onclick="changeQty(${idx}, -1)">-</button> <b>${i.qty}</b> <button onclick="changeQty(${idx}, 1)">+</button></div></div>`; });
-      document.getElementById('cart-items').innerHTML = html; document.getElementById('subtotal').innerText = sub + '៛';
-      calcTotal(sub);
-      localStorage.setItem('ptas_cart', JSON.stringify(cart)); localStorage.setItem('ptas_table', document.getElementById('table-no').value);
-      if(typeof currentEditingInv !== 'undefined') localStorage.setItem('ptas_editing', currentEditingInv || '');
+      let sub = 0; let html = ''; cart.forEach((i, idx) => { sub += i.price * i.qty; html += `<div class="cart-item"><div style="flex:1">${i.name}<br><small>${i.price}៛</small></div><div class="qty-controls"><button onclick="changeQty(${idx}, -1)">-</button> <b>${i.qty}</b> <button onclick="changeQty(${idx}, 1)">+</button></div></div>`; });
+      document.getElementById('cart-items').innerHTML = html; document.getElementById('subtotal').innerText = sub + '៛'; calcTotal(sub);
+      localStorage.setItem('ptas_cart', JSON.stringify(cart)); localStorage.setItem('ptas_table', document.getElementById('table-no').value); if(typeof currentEditingInv !== 'undefined') localStorage.setItem('ptas_editing', currentEditingInv || '');
     }
 
-    function applyPromo() {
-      let codeInput = document.getElementById('promo-code'); let code = codeInput.value.toUpperCase(); let statusText = document.getElementById('promo-status');
-      let sub = cart.reduce((s, i) => s + (i.price * i.qty), 0);
-      if (!code) { statusText.innerHTML = "<span style='color: var(--danger);'>⚠️ សូមបញ្ចូលលេខកូដសិន!</span>"; setTimeout(() => { if(!appliedPromo) statusText.innerHTML = ''; }, 3000); return; }
-      if (PROMO_DB[code] && sub >= PROMO_DB[code].min_spend) { appliedPromo = { code: code, val: PROMO_DB[code].discount_percent }; codeInput.value = ''; calcTotal(sub); renderPromoUI(); } 
-      else { appliedPromo = null; renderPromoUI(); statusText.innerHTML = "<span style='color: var(--danger);'>❌ កូដខុស ឬទិញមិនទាន់គ្រប់លក្ខខណ្ឌ!</span>"; calcTotal(sub); setTimeout(() => { if(!appliedPromo) statusText.innerHTML = ''; }, 3000); }
-    }
-
+    function applyPromo() { let codeInput = document.getElementById('promo-code'); let code = codeInput.value.toUpperCase(); let statusText = document.getElementById('promo-status'); let sub = cart.reduce((s, i) => s + (i.price * i.qty), 0); if (!code) { statusText.innerHTML = "<span style='color: var(--danger);'>⚠️ សូមបញ្ចូលលេខកូដសិន!</span>"; setTimeout(() => { if(!appliedPromo) statusText.innerHTML = ''; }, 3000); return; } if (PROMO_DB[code] && sub >= PROMO_DB[code].min_spend) { appliedPromo = { code: code, val: PROMO_DB[code].discount_percent }; codeInput.value = ''; calcTotal(sub); renderPromoUI(); } else { appliedPromo = null; renderPromoUI(); statusText.innerHTML = "<span style='color: var(--danger);'>❌ កូដខុស ឬទិញមិនទាន់គ្រប់លក្ខខណ្ឌ!</span>"; calcTotal(sub); setTimeout(() => { if(!appliedPromo) statusText.innerHTML = ''; }, 3000); } }
     function removePromo() { appliedPromo = null; let sub = cart.reduce((s, i) => s + (i.price * i.qty), 0); calcTotal(sub); renderPromoUI(); document.getElementById('promo-status').innerHTML = ''; }
-    function renderPromoUI() {
-      let promoRow = document.querySelector('.promo-row'); let statusText = document.getElementById('promo-status');
-      if (appliedPromo) { promoRow.style.display = 'none'; statusText.style.height = 'auto'; statusText.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(40,167,69,0.1); padding:8px 12px; border-radius:8px; border:1px solid #28a745;"><span style="color:#28a745;">✅ ប្រើកូដ: <b>${appliedPromo.code}</b></span><span style="cursor:pointer; color:var(--danger); font-size:14px; background:white; padding:4px 10px; border-radius:5px; border:1px solid var(--danger);" onclick="removePromo()">✖️ លុប</span></div>`; } 
-      else { promoRow.style.display = 'flex'; statusText.style.height = '18px'; }
-    }
-    
-    function calcTotal(sub) {
-      if (appliedPromo && PROMO_DB[appliedPromo.code] && sub < PROMO_DB[appliedPromo.code].min_spend) { appliedPromo = null; if(typeof renderPromoUI === 'function') renderPromoUI(); }
-      let dis = appliedPromo ? sub * appliedPromo.val : 0; let final = sub - dis; document.getElementById('discount-amt').innerText = '-' + dis + '៛'; document.getElementById('final-total').innerText = final + '៛'; return final;
-    }
+    function renderPromoUI() { let promoRow = document.querySelector('.promo-row'); let statusText = document.getElementById('promo-status'); if (appliedPromo) { promoRow.style.display = 'none'; statusText.style.height = 'auto'; statusText.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(40,167,69,0.1); padding:8px 12px; border-radius:8px; border:1px solid #28a745;"><span style="color:#28a745;">✅ ប្រើកូដ: <b>${appliedPromo.code}</b></span><span style="cursor:pointer; color:var(--danger); font-size:14px; background:white; padding:4px 10px; border-radius:5px; border:1px solid var(--danger);" onclick="removePromo()">✖️ លុប</span></div>`; } else { promoRow.style.display = 'flex'; statusText.style.height = '18px'; } }
+    function calcTotal(sub) { if (appliedPromo && PROMO_DB[appliedPromo.code] && sub < PROMO_DB[appliedPromo.code].min_spend) { appliedPromo = null; if(typeof renderPromoUI === 'function') renderPromoUI(); } let dis = appliedPromo ? sub * appliedPromo.val : 0; let final = sub - dis; document.getElementById('discount-amt').innerText = '-' + dis + '៛'; document.getElementById('final-total').innerText = final + '៛'; return final; }
 
-    function goToCheckout() {
-      if(cart.length === 0) { showCustomAlert("🛒 កន្ត្រកទទេ! សូមជ្រើសរើសទំនិញសិន។"); return; }
-      let sub = cart.reduce((s, i) => s + (i.price * i.qty), 0); document.getElementById('checkout-total').innerText = calcTotal(sub) + '៛';
-      switchView('checkout'); selectPayMethod('cash'); 
-    }
+    function goToCheckout() { if(cart.length === 0) { showCustomAlert("🛒 កន្ត្រកទទេ! សូមជ្រើសរើសទំនិញសិន។"); return; } let sub = cart.reduce((s, i) => s + (i.price * i.qty), 0); document.getElementById('checkout-total').innerText = calcTotal(sub) + '៛'; switchView('checkout'); selectPayMethod('cash'); }
+    function selectPayMethod(type) { let rightPane = document.getElementById('checkout-right-pane'); let finalTotal = parseInt(document.getElementById('final-total').innerText); let banksHtml = BANKS.map(b => `<button class="pay-btn" style="background-color: ${b.color}; color: white; padding: 10px; display: flex; justify-content: center; align-items: center; height: 55px;" onclick="processFinalCheckout('QR - ${b.name}')"><img src="${b.image}" alt="${b.name}" style="max-height: 35px; max-width: 100%;"></button>`).join(''); let mixBanksHtml = BANKS.map(b => `<button class="pay-btn" style="background-color: ${b.color}; color: white; padding: 10px; display: flex; justify-content: center; align-items: center; height: 55px;" onclick="processFinalCheckout('Mix QR - ${b.name}')"><img src="${b.image}" alt="${b.name}" style="max-height: 35px; max-width: 100%;"></button>`).join(''); if(type === 'cash') { rightPane.innerHTML = `<h2 style="text-align:center;">លុយក្រៅ</h2><h3 style="text-align:center; margin-top:50px;">បញ្ជាក់ការបង់លុយ</h3><div style="display:flex; justify-content:center; gap:10px; margin-top:30px;"><button class="pay-btn" style="background:#6c757d; width:100px;" onclick="switchView('order')">បោះបង់</button><button class="pay-btn" style="background:var(--primary); width:100px;" onclick="processFinalCheckout('លុយក្រៅសុទ្ធ')">យល់ព្រម</button></div>`; } else if (type === 'qr') { rightPane.innerHTML = `<h2>QR</h2><div class="bank-grid">${banksHtml}</div>`; } else if (type === 'mix') { rightPane.innerHTML = `<h2>លុយក្រៅ & QR</h2><input type="number" id="mix-cash-input" placeholder="បញ្ចូលទឹកប្រាក់លុយក្រៅ..." style="width:100%; padding:10px; font-size:16px; border:1px solid var(--border); border-radius:8px; margin-bottom:15px;" onkeyup="calcCheckoutMix(${finalTotal})"><p style="color:var(--danger); font-size:18px; font-weight:bold;">ខ្វះ: <span id="mix-remain-text">${finalTotal}៛</span></p><div class="bank-grid" id="mix-banks-container" style="display:none;">${mixBanksHtml}</div>`; } }
+    function calcCheckoutMix(finalTotal) { let inputVal = document.getElementById('mix-cash-input').value; let cash = Number(inputVal); let remain = finalTotal - cash; let remainText = document.getElementById('mix-remain-text'); let mixBanks = document.getElementById('mix-banks-container'); if (inputVal === '' || cash <= 0) { remainText.innerText = finalTotal + '៛'; mixBanks.style.display = 'none'; } else if (remain > 0) { remainText.innerText = remain + '៛'; mixBanks.style.display = 'grid'; } else { selectPayMethod('cash'); } }
 
-    function selectPayMethod(type) {
-      let rightPane = document.getElementById('checkout-right-pane'); let finalTotal = parseInt(document.getElementById('final-total').innerText);
-      let banksHtml = BANKS.map(b => `<button class="pay-btn" style="background-color: ${b.color}; color: white; padding: 10px; display: flex; justify-content: center; align-items: center; height: 55px;" onclick="processFinalCheckout('QR - ${b.name}')"><img src="${b.image}" alt="${b.name}" style="max-height: 35px; max-width: 100%;"></button>`).join('');
-      let mixBanksHtml = BANKS.map(b => `<button class="pay-btn" style="background-color: ${b.color}; color: white; padding: 10px; display: flex; justify-content: center; align-items: center; height: 55px;" onclick="processFinalCheckout('Mix QR - ${b.name}')"><img src="${b.image}" alt="${b.name}" style="max-height: 35px; max-width: 100%;"></button>`).join('');
-
-      if(type === 'cash') { rightPane.innerHTML = `<h2 style="text-align:center;">លុយក្រៅ</h2><h3 style="text-align:center; margin-top:50px;">បញ្ជាក់ការបង់លុយ</h3><div style="display:flex; justify-content:center; gap:10px; margin-top:30px;"><button class="pay-btn" style="background:#6c757d; width:100px;" onclick="switchView('order')">បោះបង់</button><button class="pay-btn" style="background:var(--primary); width:100px;" onclick="processFinalCheckout('លុយក្រៅសុទ្ធ')">យល់ព្រម</button></div>`; } 
-      else if (type === 'qr') { rightPane.innerHTML = `<h2>QR</h2><div class="bank-grid">${banksHtml}</div>`; } 
-      else if (type === 'mix') { rightPane.innerHTML = `<h2>លុយក្រៅ & QR</h2><input type="number" id="mix-cash-input" placeholder="បញ្ចូលទឹកប្រាក់លុយក្រៅ..." style="width:100%; padding:10px; font-size:16px; border:1px solid var(--border); border-radius:8px; margin-bottom:15px;" onkeyup="calcCheckoutMix(${finalTotal})"><p style="color:var(--danger); font-size:18px; font-weight:bold;">ខ្វះ: <span id="mix-remain-text">${finalTotal}៛</span></p><div class="bank-grid" id="mix-banks-container" style="display:none;">${mixBanksHtml}</div>`; }
-    }
-
-    function calcCheckoutMix(finalTotal) {
-      let inputVal = document.getElementById('mix-cash-input').value; let cash = Number(inputVal); let remain = finalTotal - cash;
-      let remainText = document.getElementById('mix-remain-text'); let mixBanks = document.getElementById('mix-banks-container');
-      if (inputVal === '' || cash <= 0) { remainText.innerText = finalTotal + '៛'; mixBanks.style.display = 'none'; } else if (remain > 0) { remainText.innerText = remain + '៛'; mixBanks.style.display = 'grid'; } else { selectPayMethod('cash'); } 
-    }
-
-    // លុបបំបាត់ការបង្កើតលេខជាន់គ្នា (Desync) រវាង Frontend នឹង Backend
     function processFinalCheckout(method) {
       let sub = cart.reduce((s, i) => s + (i.price * i.qty), 0); let finalTotal = calcTotal(sub); let tableNo = document.getElementById('table-no').value;
-      
-      let currentTime = new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});
-      let currentDate = getFormattedDate();
-      let targetInvNo = currentEditingInv;
-
-      if (!targetInvNo) {
-         // បើជាវិក្កយបត្រថ្មីសន្លាង Frontend ជាអ្នកកសាងលេខ Invoice ហើយបញ្ជូនទៅ Backend ផ្ទាល់
-         let nextNum = 1; ALL_HISTORY.forEach(h => { let match = h.inv.match(/#INV-(\d+)/); if(match) { let num = parseInt(match[1]); if(num >= nextNum) nextNum = num + 1; } }); 
-         targetInvNo = "#INV-" + ("000" + nextNum).slice(-3);
-         let newInv = { inv: targetInvNo, table: tableNo, time: currentTime, date: currentDate, items: JSON.parse(JSON.stringify(cart)), totalRiel: finalTotal, method: method, status: method === 'មិនទាន់ទូទាត់' ? 'មិនទាន់ទូទាត់' : 'បានទូទាត់' }; 
-         ALL_HISTORY.unshift(newInv); if(ALL_HISTORY.length > 100) ALL_HISTORY.pop(); 
-      } else {
-         let existingInv = ALL_HISTORY.find(x => x.inv === targetInvNo); 
-         if (existingInv) { existingInv.items = JSON.parse(JSON.stringify(cart)); existingInv.totalRiel = finalTotal; existingInv.method = method; existingInv.table = tableNo; existingInv.time = currentTime; existingInv.status = method === 'មិនទាន់ទូទាត់' ? 'មិនទាន់ទូទាត់' : 'បានទូទាត់'; }
-      }
-
-      // បញ្ជូនលេខ targetInvNo ដែលត្រឹមត្រូវទៅកាន់ប្រព័ន្ធ Google Sheet
+      let currentTime = new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'}); let currentDate = getFormattedDate(); let targetInvNo = currentEditingInv;
+      if (!targetInvNo) { let nextNum = 1; ALL_HISTORY.forEach(h => { let match = h.inv.match(/#INV-(\d+)/); if(match) { let num = parseInt(match[1]); if(num >= nextNum) nextNum = num + 1; } }); targetInvNo = "#INV-" + ("000" + nextNum).slice(-3); let newInv = { inv: targetInvNo, table: tableNo, time: currentTime, date: currentDate, items: JSON.parse(JSON.stringify(cart)), totalRiel: finalTotal, method: method, status: method === 'មិនទាន់ទូទាត់' ? 'មិនទាន់ទូទាត់' : 'បានទូទាត់' }; ALL_HISTORY.unshift(newInv); if(ALL_HISTORY.length > 100) ALL_HISTORY.pop(); } else { let existingInv = ALL_HISTORY.find(x => x.inv === targetInvNo); if (existingInv) { existingInv.items = JSON.parse(JSON.stringify(cart)); existingInv.totalRiel = finalTotal; existingInv.method = method; existingInv.table = tableNo; existingInv.time = currentTime; existingInv.status = method === 'មិនទាន់ទូទាត់' ? 'មិនទាន់ទូទាត់' : 'បានទូទាត់'; } }
       let payload = { action: "order", invNo: targetInvNo, table: tableNo, items: cart, subTotal: sub, discountAmount: appliedPromo ? sub * appliedPromo.val : 0, promoCode: appliedPromo ? appliedPromo.code : "គ្មាន", finalTotal: finalTotal, method: method };
-
       renderHistoryList(); cart = []; currentEditingInv = null; localStorage.removeItem('ptas_cart'); localStorage.removeItem('ptas_table'); localStorage.removeItem('ptas_editing'); appliedPromo = null; renderPromoUI(); updateCart(); switchView('order');
       sendDataToCloud(payload, method === 'មិនទាន់ទូទាត់' ? "កំពុងរក្សាទុកបុងជំពាក់..." : "កំពុងដំណើរការទូទាត់ប្រាក់...");
     }
@@ -450,27 +409,11 @@
     function filterHist(type) { currentHistFilter = type; let text = type === 'all' ? 'បង្ហាញទាំងអស់' : (type === 'paid' ? 'បានទូទាត់' : 'មិនទាន់ទូទាត់'); document.getElementById('hist-filter-text').innerText = text; document.getElementById('hist-dropdown').style.display = 'none'; renderHistoryList(); }
 
     function renderHistoryList() {
-      let list = ALL_HISTORY; 
-      if (currentHistFilter === 'paid') list = list.filter(x => x.status === 'បានទូទាត់'); 
-      if (currentHistFilter === 'unpaid') list = list.filter(x => x.status === 'មិនទាន់ទូទាត់');
-      
+      let list = ALL_HISTORY; if (currentHistFilter === 'paid') list = list.filter(x => x.status === 'បានទូទាត់'); if (currentHistFilter === 'unpaid') list = list.filter(x => x.status === 'មិនទាន់ទូទាត់');
       let html = ''; let lastDate = ''; 
       list.forEach((inv) => {
-         let invDate = inv.date || getFormattedDate(); 
-         
-         if (invDate.includes("AM") || invDate.includes("PM") || invDate.includes(":")) {
-             invDate = getFormattedDate(); 
-             inv.date = invDate; 
-         }
-         
-         // បង្រួបបង្រួមទិន្នន័យចាស់៖ បើថ្ងៃខែចាស់មានតែ១ខ្ទង់ (ឧ. "1,Sep,26") វាត្រូវថែម "0" ពីមុខឱ្យទៅជា "01,Sep,26" ស្វ័យប្រវត្តិ
-         if (/^\d,/.test(invDate)) {
-             invDate = "0" + invDate;
-             inv.date = invDate;
-         }
-
+         let invDate = inv.date;
          if (invDate !== lastDate) { html += `<div class="date-separator">📅 ថ្ងៃទី ${invDate}</div>`; lastDate = invDate; }
-         
          let statusColor = inv.status === 'មិនទាន់ទូទាត់' ? 'var(--danger)' : '#28a745';
          html += `<div class="hist-card" onclick="showHistDetails('${inv.inv}', this)"><div><div style="font-weight:bold; font-size:15px; font-family:'Dangrek';">ការកម្មង់ ${inv.inv}</div><div class="hist-status" style="margin-top:5px; font-weight:bold; color: ${statusColor}; font-size:13px;">${inv.status}</div></div><div style="text-align:right;"><div style="font-weight:bold; font-size:18px; font-family:'Koulen';">${inv.totalRiel}៛</div><div class="text-muted" style="margin-top:5px;">${inv.time}</div></div></div>`;
       });
@@ -496,15 +439,45 @@
       document.getElementById('exp-name').value = ''; document.getElementById('exp-amount').value = '';
     }
 
-    function showExpenseHistory() {
-      let html = `<h3 style="margin-top:0; font-family:'Dangrek';">📋 បញ្ជីចំណាយប្រចាំថ្ងៃ</h3>`;
-      if(EXPENSE_DB.length === 0) { html += `<p style="color:#777;">មិនទាន់មានការកត់ត្រាចំណាយថ្ងៃនេះទេ!</p>`; } 
-      else { EXPENSE_DB.forEach(ex => { html += `<div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding:8px 0; font-size:16px;"><span>${ex.name} <small style="color:#888;">(${ex.time})</small></span><b style="color:var(--danger);">${ex.amount.toLocaleString()}៛</b></div>`; }); }
-      showCustomAlert(html);
+    // មុខងារបង្ហាញផ្ទាំង Modal ប្រវត្តិចំណាយ (ប្រើ Class ដើម្បីលោត Animation)
+    function toggleExpenseDrawer() {
+      let drawer = document.getElementById('expense-drawer');
+      if (!drawer.classList.contains('active')) {
+        renderExpenseDrawer();
+        drawer.classList.add('active');
+      } else {
+        drawer.classList.remove('active');
+      }
+    }
+    
+    // អនុញ្ញាតឱ្យចុចលើផ្ទៃពណ៌ខ្មៅខាងក្រៅ ដើម្បីបិទផ្ទាំងចំណាយ
+    window.addEventListener('click', function(e) {
+      let drawer = document.getElementById('expense-drawer');
+      if (e.target === drawer) {
+        toggleExpenseDrawer();
+      }
+    });
+
+    function renderExpenseDrawer() {
+      let html = '';
+      if(EXPENSE_DB.length === 0) { 
+          html = `<p style="text-align:center; color:#777; margin-top:50px; font-size:18px;">មិនទាន់មានការកត់ត្រាចំណាយថ្ងៃនេះទេ!</p>`; 
+      } else { 
+          EXPENSE_DB.forEach(ex => { 
+              html += `
+              <div class="exp-list-card">
+                 <div class="exp-title">${ex.name}</div>
+                 <div style="text-align:right;">
+                    <div class="exp-amount">${ex.amount.toLocaleString()}៛</div>
+                    <div class="exp-time">${ex.time}</div>
+                 </div>
+              </div>`; 
+          }); 
+      }
+      document.getElementById('expense-list-content').innerHTML = html;
     }
 
     function closeShift() {
-      // Frontend ជាអ្នកឆែកភាពត្រឹមត្រូវ បើមានជំពាក់វានឹងឃាំងនៅទីនេះ មិនបាច់ចាំដល់ Backend
       let unpaidCount = ALL_HISTORY.filter(x => x.status === 'មិនទាន់ទូទាត់').length;
       if(unpaidCount > 0) { showCustomAlert("⚠️ មិនអាចបិទវេនបានទេ! នៅសល់បុងជំពាក់ចំនួន " + unpaidCount + " មិនទាន់គិតលុយ។"); return; }
       
