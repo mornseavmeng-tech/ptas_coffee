@@ -137,6 +137,11 @@
   </style>
 </head>
 <body>
+  <!-- ផ្ទាំង Loading ពេលកំពុងបញ្ជូនទិន្នន័យ (បិទមិនឱ្យចុចអ្វីផ្សេង) -->
+  <div id="loading-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:999999; flex-direction:column; justify-content:center; align-items:center; color:white;">
+    <div class="wave-dots" style="margin-bottom:15px;"><span></span><span></span><span></span><span></span></div>
+    <h2 id="loading-text" style="font-family:'Dangrek'; margin:0; font-size:24px; font-weight:normal; letter-spacing:1px;">កំពុងដំណើរការ...</h2>
+  </div>
 
   <div id="splash-screen">
     <img src="https://i.postimg.cc/Y9qXGCT1/3-(2).png" alt="PTAS Logo" class="splash-logo">
@@ -310,9 +315,19 @@
     }
 
     async function sendDataToCloud(payload, loadingMsg) {
+      // បង្ហាញផ្ទាំង Loading
+      let loadingOverlay = document.getElementById('loading-overlay');
+      let loadingText = document.getElementById('loading-text');
+      loadingText.innerText = loadingMsg || "កំពុងដំណើរការ...";
+      loadingOverlay.style.display = 'flex';
+
       try {
         let res = await fetch(API_URL, { method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify(payload) });
         let result = await res.json();
+        
+        // លាក់ផ្ទាំង Loading ពេលដើរចប់
+        loadingOverlay.style.display = 'none';
+
         if(result.status === 'success') { 
             if(payload.action === 'close_shift') {
                 renderCloseShiftSummary(JSON.parse(result.message)); // Render ផ្ទាំង Artboard 2
@@ -321,7 +336,10 @@
             }
         } 
         else { showCustomAlert("❌ កំហុសបច្ចេកទេស: " + result.message); }
-      } catch(e) { showCustomAlert("❌ បរាជ័យក្នុងការភ្ជាប់ទៅកាន់ Server!"); }
+      } catch(e) { 
+        loadingOverlay.style.display = 'none'; // លាក់ផ្ទាំង Loading ពេល Error
+        showCustomAlert("❌ បរាជ័យក្នុងការភ្ជាប់ទៅកាន់ Server!"); 
+      }
     }
 
     function getFormattedDate() {
@@ -432,6 +450,7 @@
     }
 
     // មុខងារនេះបានកែសម្រួលដើម្បីបង្ហាញ "លុយក្រៅ & Qr" យ៉ាងច្បាស់នៅក្នុងប្រវត្តិ
+    // មុខងារនេះបានកែសម្រួលដើម្បីបំបាត់ពាក្យ undefined សម្រាប់បុងចាស់ៗ
     function showHistDetails(invNo, el) {
       document.querySelectorAll('.hist-card').forEach(c => c.classList.remove('active')); el.classList.add('active'); let inv = ALL_HISTORY.find(x => x.inv === invNo); if(!inv) return;
       
@@ -441,6 +460,10 @@
       
       let methodStr = inv.method || 'មិនទាន់';
       if(methodStr.includes('Mix')) methodStr = 'លុយក្រៅ & QR';
+      
+      // ដោះស្រាយបញ្ហា undefined សម្រាប់បុងចាស់ ដោយប្រើលក្ខខណ្ឌ || 0
+      let mCash = inv.mixCash || 0;
+      let mQr = inv.mixQr || 0;
       
       let rightPane = `
         <h1 style="margin:0; font-size:32px;">ការកម្មង់ ${inv.inv}</h1>
@@ -457,7 +480,7 @@
            <div>សរុប</div>
            <div style="text-align:right;">
              ${inv.totalRiel}៛
-             ${(inv.method && inv.method.includes('Mix')) ? `<div style="font-size:16px; color:#666; font-weight:normal; margin-top:5px; font-family:'Dangrek';">លុយក្រៅ ${inv.mixCash}៛ & QR ${inv.mixQr}៛</div>` : ''}
+             ${(inv.method && inv.method.includes('Mix')) ? `<div style="font-size:16px; color:#666; font-weight:normal; margin-top:5px; font-family:'Dangrek';">លុយក្រៅ ${mCash}៛ & QR ${mQr}៛</div>` : ''}
            </div>
         </div>
         ${actionBtns}
