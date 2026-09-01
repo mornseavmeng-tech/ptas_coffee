@@ -212,7 +212,7 @@
   <div class="main-content" id="view-shift" style="display:none; justify-content:center; align-items:center; background-color: #ebf1f6;">
     <div class="form-box" style="text-align:center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 40px; border: 1px dashed #7c98b6;">
       <h2 style="margin-top:0; display:flex; align-items:center; justify-content:center; gap:10px; color:#333;"><i class="fa-solid fa-user-xmark" style="color:var(--danger);"></i>បិទវេនប្រចាំថ្ងៃ</h2>
-      <p style="color:#666; margin-bottom:30px; font-size:16px;">ការបិទវេនអាចធ្វើបានតែ ១ ដងក្នុងមួយថ្ងៃ និងពេលមានទំនិញលក់បានប៉ុណ្ណោះ។</p>
+      <p style="color:#666; margin-bottom:30px; font-size:16px;">មួយថ្ងៃអាចបិតបាន ១ ដង ប៉ុណ្ណោះបន្ទាប់ពីការធ្វើតេស្តត្រូវបានបញ្ចប់់។</p>
       <button class="pay-btn" onclick="closeShift()" style="background:var(--danger); padding:15px; font-size:18px; width:100%; border-radius:8px;">បិទវេនឥឡូវនេះ</button>
     </div>
   </div>
@@ -522,7 +522,7 @@
       if(unpaidCount > 0) { showCustomAlert("⚠️ មិនអាចបិទវេនបានទេ! នៅសល់បុងជំពាក់ចំនួន " + unpaidCount + " មិនទាន់គិតលុយ។"); return; }
       
       showCustomConfirm("តើអ្នកពិតជាចង់បិទវេនប្រចាំថ្ងៃមែនទេ?", function() {
-          sendDataToCloud({ action: "close_shift" }, "កំពុងដំណើរការបិទវេន និងបោសសម្អាត...");
+          sendDataToCloud({ action: "close_shift" }, "កំពុងដំណើរការបិទវេន...");
       });
     }
 
