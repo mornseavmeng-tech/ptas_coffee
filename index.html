@@ -7,6 +7,13 @@
   
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Dangrek&family=Koulen&display=swap');
+    
+    * { 
+      touch-action: manipulation; 
+      -webkit-tap-highlight-color: transparent; 
+      user-select: none;
+    }
+    
     :root {
       --primary: #0056b3; --bg: #f4f6f9; --card-bg: #ffffff; --text: #333; --danger: #dc3545; --border: #e0e0e0;
     }
@@ -14,7 +21,24 @@
     button, input, .tab, .nav-btn { font-family: 'Dangrek', sans-serif; }
     h1, h2, h3, h4, .logo, .price-tag, .total-row { font-family: 'Koulen', sans-serif; font-weight: normal; }
     
-    .sidebar { width: 220px; background: var(--primary); color: white; display: flex; flex-direction: column; padding: 20px 0 20px 15px; box-sizing: border-box; overflow-y: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    /* Splash Artboard 7 Screen */
+    #splash-screen {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #0056b3;
+      display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 99999;
+      transition: opacity 0.6s ease;
+    }
+    .splash-logo { width: 180px; height: auto; margin-bottom: 25px; }
+    .wave-dots { display: flex; gap: 8px; }
+    .wave-dots span {
+      width: 12px; height: 12px; background: white; border-radius: 50%;
+      animation: wave 1.2s infinite ease-in-out;
+    }
+    .wave-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .wave-dots span:nth-child(3) { animation-delay: 0.4s; }
+    .wave-dots span:nth-child(4) { animation-delay: 0.6s; }
+    @keyframes wave { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-12px); } }
+
+    .sidebar { width: 220px; background: var(--primary); color: white; display: flex; flex-direction: column; padding: 20px 0 20px 15px; box-sizing: border-box; overflow-y: auto; scrollbar-width: none; }
     .sidebar::-webkit-scrollbar { display: none; }
     .logo { font-size: 22px; font-weight: bold; text-align: center; margin-bottom: 30px; padding-right: 15px; }
     .nav-btn { background: transparent; border: none; color: white; padding: 15px 20px; text-align: left; font-size: 16px; cursor: pointer; border-radius: 20px 0 0 20px; margin-bottom: 5px; transition: all 0.2s ease; width: 100%; box-sizing: border-box; }
@@ -23,38 +47,39 @@
 
     .main-content { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; }
     .order-layout { display: flex; flex: 1; gap: 20px; }
-    .product-section { flex: 1; }
-    .cart-section { width: 350px; background: var(--card-bg); border-radius: 12px; padding: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
+    .product-section { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+    
+    .cart-section { width: 350px; background: var(--card-bg); border-radius: 12px; padding: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; max-height: calc(100vh - 40px); position: sticky; top: 0; }
 
-    .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 10px; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 10px; overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }
     .tabs::-webkit-scrollbar { display: none; }
     .tab { padding: 8px 15px; border-radius: 20px; background: white; border: 1px solid var(--primary); color: var(--primary); cursor: pointer; white-space: nowrap; flex-shrink: 0; }
     .tab.active { background: var(--primary); color: white; }
     
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; overflow-y: auto; padding-bottom: 20px; }
     .product-card { background: var(--card-bg); border-radius: 12px; padding: 15px; text-align: center; border: 2px solid transparent; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .product-card:active { border-color: var(--primary); }
+    .product-card:active { border-color: var(--primary); transform: scale(0.98); }
     .price-tag { font-weight: bold; color: var(--primary); margin-top: 5px; }
     .old-price { text-decoration: line-through; color: rgba(220,53,69,0.5); font-size: 12px; margin-right: 5px; } 
 
-    .table-input { width: 60px; padding: 5px; border: 1px solid var(--border); border-radius: 5px; text-align: center; font-weight: bold; }
+    .table-input { width: 60px; padding: 5px; border: 1px solid var(--border); border-radius: 5px; text-align: center; font-weight: bold; user-select: text; }
     .cart-items { flex: 1; overflow-y: auto; margin-top: 15px; border-top: 1px solid var(--border); padding-top: 10px; }
     .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 14px; }
-    .qty-controls button { background: none; border: none; font-size: 18px; color: var(--primary); cursor: pointer; padding: 0 5px; }
+    .qty-controls button { background: none; border: none; font-size: 22px; color: var(--primary); cursor: pointer; padding: 0 10px; }
     
     .checkout-box { margin-top: 15px; border-top: 2px dashed var(--border); padding-top: 15px; }
     .promo-row { display: flex; gap: 5px; margin-bottom: 15px; }
-    .promo-row input { flex: 1; padding: 8px; border: 1px solid var(--border); border-radius: 5px; }
-    .promo-row button { background: var(--text); color: white; border: none; padding: 8px 15px; border-radius: 5px; }
+    .promo-row input { flex: 1; padding: 8px; border: 1px solid var(--border); border-radius: 5px; user-select: text; }
+    .promo-row button { background: var(--text); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
     .total-row { display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; color: var(--primary); margin-top: 10px; }
     
-    .pay-btn { padding: 12px; border: none; border-radius: 8px; font-weight: bold; color: white; cursor: pointer; white-space: nowrap; overflow: hidden; transition: all 0.1s ease-in-out; }
+    .pay-btn { padding: 12px; border: none; border-radius: 8px; font-weight: bold; color: white; cursor: pointer; white-space: nowrap; overflow: hidden; transition: transform 0.1s; }
     .pay-btn:active { transform: scale(0.95); opacity: 0.8; }
     
     .bank-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-    .form-box { background: white; padding: 20px; border-radius: 12px; max-width: 400px; margin: 0 auto; }
-    .form-box input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid var(--border); border-radius: 5px; box-sizing: border-box; }
-    .form-box button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 5px; font-weight: bold; }
+    .form-box { background: white; padding: 20px; border-radius: 12px; max-width: 400px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+    .form-box input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid var(--border); border-radius: 5px; box-sizing: border-box; user-select: text; }
+    .form-box button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
     
     .hist-card { border: 2px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 15px; cursor: pointer; display: flex; justify-content: space-between; transition: 0.2s; background: white; align-items: center;}
     .hist-card:hover { border-color: var(--primary); }
@@ -64,15 +89,19 @@
     .text-muted { color: #888; font-size: 12px; }
     
     .date-separator { background: rgba(0, 86, 179, 0.1); color: var(--primary); padding: 8px 15px; border-radius: 8px; margin: 15px 0 10px 0; font-family: 'Dangrek', sans-serif; font-size: 15px; text-align: center; }
-
-    /* បង្វិល Icon ពេល Loading */
-    .spin { animation: spin 1s linear infinite; }
-    @keyframes spin { 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
 
-  <!-- UI Framework -->
+  <!-- Splash Artboard 7 Screen -->
+  <div id="splash-screen">
+    <img src="https://i.postimg.cc/Y9qXGCT1/3-(2).png" alt="PTAS Logo" class="splash-logo">
+    <div class="wave-dots">
+      <span></span><span></span><span></span><span></span>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
   <div class="sidebar" id="app-sidebar" style="display:none;">
     <div class="logo">
       <img src="https://i.postimg.cc/Y9qXGCT1/3-(2).png" alt="PTAS COFFEE" style="width: 80%; max-width: 150px; height: auto; margin: 0 auto; display: block;">
@@ -82,7 +111,7 @@
     <button class="nav-btn" onclick="switchView('shift')">បិតវេន</button>
     <button class="nav-btn" onclick="switchView('expense')">ចំណាយ</button>
     <button class="nav-btn" id="btn-report" style="display:none; color: #ffc107;" onclick="switchView('report')">📊 របាយការណ៍</button>
-    <button class="nav-btn" id="btn-logout" style="color: #ff4d4d; margin-top: auto;" onclick="logout()">🚪 ចាកចេញ (Logout)</button>
+    <button class="nav-btn" id="btn-logout" style="color: #ff4d4d; margin-top: auto;" onclick="logout()">🚪 ចាកចេញ</button>
   </div>
 
   <!-- ផ្ទាំង១: Order UI -->
@@ -100,7 +129,7 @@
         <div class="cart-items" id="cart-items"></div>
         <div class="checkout-box">
           <div class="promo-row" style="margin-bottom: 5px;">
-            <input type="text" id="promo-code" placeholder="កូដបញ្ចុះតម្លៃ...">
+            <input type="text" id="promo-code" placeholder="កូដបញ្ចុះតម្លៃ..." onkeypress="if(event.key === 'Enter') applyPromo()">
             <button onclick="applyPromo()">ប្រើកូដ</button>
           </div>
           <div id="promo-status" style="font-size: 13px; margin-bottom: 15px; height: 18px; font-weight: bold;"></div>
@@ -143,19 +172,20 @@
   <div class="main-content" id="view-shift" style="display:none; justify-content:center; align-items:center;">
     <div class="form-box" style="text-align:center;">
       <h2>បិទវេនប្រចាំថ្ងៃ</h2>
-      <p>ទិន្នន័យប្រចាំថ្ងៃនឹងត្រូវបានកាត់ និងរក្សាទុកចូលក្នុង Google Sheet ដោយស្វ័យប្រវត្តិ។</p>
-      <button class="pay-btn" onclick="closeShift()" style="background:var(--danger); padding:15px; font-size:18px;">បិទវេនឥឡូវនេះ</button>
+      <p>ការបិទវេនអាចធ្វើបានតែ ១ ដងក្នុងមួយថ្ងៃ និងពេលមានទំនិញលក់បានប៉ុណ្ណោះ។</p>
+      <button class="pay-btn" onclick="closeShift()" style="background:var(--danger); padding:15px; font-size:18px; width:100%;">បិទវេនឥឡូវនេះ</button>
     </div>
   </div>
 
   <!-- ផ្ទាំង៤: Expense -->
-  <div class="main-content" id="view-expense" style="display:none; justify-content:center; align-items:center;">
+  <div class="main-content" id="view-expense" style="display:none; justify-content:center; align-items:center; position:relative;">
+    <button onclick="showExpenseHistory()" style="position:absolute; top:20px; right:20px; background:var(--primary); color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; font-family:'Dangrek';">📋 មើលបញ្ជីចំណាយ</button>
     <div class="form-box">
       <h2>💸 កត់ត្រាចំណាយ</h2>
       <label>ឈ្មោះចំណាយ (ឧ. ទិញទឹកកក)៖</label>
       <input type="text" id="exp-name" placeholder="វាយបញ្ចូលឈ្មោះចំណាយ...">
       <label>តម្លៃ (រៀល)៖</label>
-      <input type="number" id="exp-amount" placeholder="ឧទាហរណ៍៖ 5000">
+      <input type="number" id="exp-amount" placeholder="ឧទាហរណ៍៖ 5000" onkeypress="if(event.key === 'Enter') saveExpense()">
       <button class="pay-btn" onclick="saveExpense()">រក្សាទុកចំណាយ</button>
     </div>
   </div>
@@ -165,11 +195,11 @@
     <div class="form-box" style="text-align:center; max-width:500px;">
       <h2>📊 របាយការណ៍ហាង</h2>
       <p>សូមមើលរបាយការណ៍លម្អិតប្រចាំខែនៅក្នុង Google Sheets ផ្ទាល់។</p>
-      <button class="pay-btn" onclick="window.open('https://docs.google.com/spreadsheets/d/1f0arf668BIlKC7J_SmtZL0ZE9Bd7ADx2ETVf3snrlw0/edit', '_blank')" style="background:var(--primary); padding:15px; font-size:18px;">បើក Google Sheets</button>
+      <button class="pay-btn" onclick="window.open('https://docs.google.com/spreadsheets/d/1Vo7HmPg8JMte8mZsxutqcdCsmKUZE4TpgEgJ04ejIx0/edit', '_blank')" style="background:var(--primary); padding:15px; font-size:18px;">បើក Google Sheets</button>
     </div>
   </div>
 
-  <!-- ផ្ទាំង Checkout -->
+  <!-- Checkout View -->
   <div class="main-content" id="view-checkout" style="display:none; padding:0;">
     <div style="display:flex; height:100%; width:100%;">
       <div style="flex:1; padding:20px; border-right:1px solid var(--border); background:white;">
@@ -191,10 +221,8 @@
   </div>
 
   <script>
-    // ==========================================
-    // ⚠️ ដាក់ Web App URL ថ្មីរបស់អ្នកនៅទីនេះ
-    // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbxXerUxY7GsyHimvgqRJbSkQs0SG-DxSTxs6DGQVmyITcwjViMoIpVx5-czennPqlNA/exec";
+    // ⚠️ ដាក់ URL ថ្មីនៅទីនេះ
+    const API_URL = "https://script.google.com/macros/s/AKfycbxzqlQ7IaJZUA52A1r6YpQdCb19V-NQhlHduQ7E7JsZER5jQV4LF5N-_1t25H-_hmw/exec";
 
     let MENU_DB = {}; let PROMO_DB = {}; let UNPAID_DB = []; let HISTORY_DB = []; let EXPENSE_DB = []; let ALL_HISTORY = [];
     let cart = []; let currentCat = ""; let appliedPromo = null; let currentEditingInv = null; let currentHistFilter = 'all';
@@ -211,25 +239,12 @@
       { name: 'Woori Bank', color: '#1472af', image: 'https://i.postimg.cc/jjRJ6gtV/woori.jpg' }
     ];
 
-    // ==========================================
-    // ប្រព័ន្ធជំនួយ (Popup & Loading)
-    // ==========================================
-    function showLoading(msg) {
-      let overlay = document.createElement('div');
-      overlay.id = 'global-loading';
-      overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); display:flex; justify-content:center; align-items:center; z-index:100000; font-family:"Dangrek"; font-size:24px; color:var(--primary); flex-direction:column;';
-      overlay.innerHTML = `<div style="margin-bottom:15px;"><svg width="50" height="50" viewBox="0 0 24 24" stroke="var(--primary)" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="spin"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg></div>${msg}`;
-      document.body.appendChild(overlay);
-    }
-
-    function hideLoading() { let el = document.getElementById('global-loading'); if(el) el.remove(); }
-
     function showCustomAlert(msg, callback) {
       let overlay = document.createElement('div');
       overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:10000;';
       let box = document.createElement('div');
-      box.style.cssText = 'background:white; padding:25px; border-radius:12px; text-align:center; width:80%; max-width:300px; box-shadow:0 5px 15px rgba(0,0,0,0.2);';
-      box.innerHTML = `<p style="font-family:'Dangrek'; font-size:20px; color:#333; margin-bottom:20px; line-height:1.5;">${msg}</p>`;
+      box.style.cssText = 'background:white; padding:25px; border-radius:12px; text-align:center; width:80%; max-width:320px; box-shadow:0 5px 15px rgba(0,0,0,0.2);';
+      box.innerHTML = `<p style="font-family:'Dangrek'; font-size:18px; color:#333; margin-bottom:20px; line-height:1.5; white-space:pre-line; text-align:left;">${msg}</p>`;
       let btn = document.createElement('button');
       btn.style.cssText = 'background:var(--primary); color:white; border:none; padding:12px 30px; border-radius:8px; font-family:"Dangrek"; font-size:18px; cursor:pointer; width:100%;';
       btn.innerText = 'យល់ព្រម (OK)';
@@ -253,70 +268,54 @@
       btnGroup.appendChild(btnNo); btnGroup.appendChild(btnYes); box.appendChild(btnGroup); overlay.appendChild(box); document.body.appendChild(overlay);
     }
 
-    // ==========================================
-    // ប្រព័ន្ធតភ្ជាប់ទៅ Google Sheet (API POST)
-    // ==========================================
     async function sendDataToCloud(payload, loadingMsg) {
-      showLoading(loadingMsg);
       try {
         let res = await fetch(API_URL, {
           method: 'POST',
-          headers: {'Content-Type': 'text/plain;charset=utf-8'}, // ការពារ CORS Issue
+          headers: {'Content-Type': 'text/plain;charset=utf-8'},
           body: JSON.stringify(payload)
         });
         let result = await res.json();
-        hideLoading();
         if(result.status === 'success') {
           showCustomAlert(result.message, function() {
-              if(payload.action === 'close_shift') location.reload(); // Refresh ក្រោយបិទវេន
+              if(payload.action === 'close_shift') location.reload();
           });
         } else {
           showCustomAlert("❌ កំហុសបច្ចេកទេស: " + result.message);
         }
       } catch(e) {
-        hideLoading();
-        showCustomAlert("❌ បរាជ័យក្នុងការភ្ជាប់ទៅកាន់ Server! សូមពិនិត្យអ៊ីនធឺណិត។");
+        showCustomAlert("❌ បរាជ័យក្នុងការភ្ជាប់ទៅកាន់ Server!");
       }
     }
 
     function getFormattedDate() {
       const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      let d = new Date(); return d.getDate() + "," + months[d.getMonth()] + "," + String(d.getFullYear()).slice(-2);
+      let d = new Date(); 
+      let day = d.getDate();
+      let paddedDay = day < 10 ? "0" + day : day; // បន្ថែមលេខ 0 ពីមុខបើថ្ងៃក្រោម ១០ (ឧ. 1 ទៅជា 01)
+      return paddedDay + "," + months[d.getMonth()] + "," + String(d.getFullYear()).slice(-2);
     }
 
-    // ==========================================
-    // ទាញយកទិន្នន័យពី Server ពេលបើក App ភ្លាម (Boot)
-    // ==========================================
     window.onload = async function() {
-      showLoading("កំពុងទាញយកទិន្នន័យប្រព័ន្ធ...");
       try {
         let res = await fetch(API_URL);
         let data = await res.json();
-        
-        MENU_DB = data.menuData || {};
-        PROMO_DB = data.promoData || {};
-        UNPAID_DB = data.unpaidData || [];
-        HISTORY_DB = data.historyData || [];
-        EXPENSE_DB = data.expenseData || [];
-
+        MENU_DB = data.menuData || {}; PROMO_DB = data.promoData || {}; UNPAID_DB = data.unpaidData || []; HISTORY_DB = data.historyData || []; EXPENSE_DB = data.expenseData || [];
         let todayDate = getFormattedDate();
-        ALL_HISTORY = [
-          ...UNPAID_DB.map(x => ({...x, status: 'មិនទាន់ទូទាត់', date: todayDate})),
-          ...HISTORY_DB.map(x => ({...x, status: 'បានទូទាត់', date: x.date || todayDate}))
-        ];
+        ALL_HISTORY = [...UNPAID_DB.map(x => ({...x, status: 'មិនទាន់ទូទាត់', date: todayDate})), ...HISTORY_DB.map(x => ({...x, status: 'បានទូទាត់', date: x.date || todayDate}))];
         
-        hideLoading();
-        initAuth(); // ទៅកាន់ប្រព័ន្ធ Login
-      } catch(e) {
-        hideLoading();
-        showCustomAlert("⚠️ មិនអាចទាញយកទិន្នន័យបានទេ! សូម Refresh ឡើងវិញ។");
-      }
+        setTimeout(() => {
+          let splash = document.getElementById('splash-screen');
+          splash.style.opacity = '0';
+          setTimeout(() => splash.remove(), 600);
+          initAuth();
+        }, 1200);
+      } catch(e) { showCustomAlert("⚠️ មិនអាចទាញយកទិន្នន័យបានទេ! សូម Refresh ឡើងវិញ។"); }
     };
 
     function initAuth() {
       let userRole = localStorage.getItem('ptas_role');
-      if (!userRole) { showLoginScreen(); } 
-      else { buildAppUI(userRole); }
+      if (!userRole) { showLoginScreen(); } else { buildAppUI(userRole); }
     }
 
     function showLoginScreen() {
@@ -341,45 +340,25 @@
       else { showCustomAlert("❌ លេខកូដមិនត្រឹមត្រូវទេ!"); }
     }
 
-    function logout() {
-      showCustomConfirm("តើអ្នកពិតជាចង់ចាកចេញមែនទេ?", function() {
-         localStorage.removeItem('ptas_role');
-         document.getElementById('app-sidebar').style.display = 'none';
-         document.getElementById('view-order').style.display = 'none';
-         showLoginScreen();
-      });
-    }
+    function logout() { showCustomConfirm("តើអ្នកពិតជាចង់ចាកចេញមែនទេ?", function() { localStorage.removeItem('ptas_role'); document.getElementById('app-sidebar').style.display = 'none'; document.getElementById('view-order').style.display = 'none'; showLoginScreen(); }); }
 
     function buildAppUI(role) {
-      document.getElementById('app-sidebar').style.display = 'flex';
-      document.getElementById('view-order').style.display = 'flex';
+      document.getElementById('app-sidebar').style.display = 'flex'; document.getElementById('view-order').style.display = 'flex';
       if (role === 'manager') document.getElementById('btn-report').style.display = 'block';
-
-      currentCat = Object.keys(MENU_DB)[0];
-      let tabsHtml = '';
+      currentCat = Object.keys(MENU_DB)[0]; let tabsHtml = '';
       for (let cat in MENU_DB) tabsHtml += `<div class="tab ${cat===currentCat?'active':''}" onclick="loadCat('${cat}')">${cat}</div>`;
-      document.getElementById('category-tabs').innerHTML = tabsHtml;
-          
-      loadCat(currentCat); 
-      renderHistoryList();
-
+      document.getElementById('category-tabs').innerHTML = tabsHtml; loadCat(currentCat); renderHistoryList();
       let savedCart = localStorage.getItem('ptas_cart'); let savedTable = localStorage.getItem('ptas_table'); let savedEditing = localStorage.getItem('ptas_editing');
       if (savedCart) { cart = JSON.parse(savedCart); if (savedTable) document.getElementById('table-no').value = savedTable; if (savedEditing) currentEditingInv = savedEditing; updateCart(); }
     }
 
-    // ==========================================
-    // មុខងារប្រើប្រាស់ក្នុង App
-    // ==========================================
     function loadCat(cat) {
-      currentCat = cat;
-      document.querySelectorAll('#category-tabs .tab').forEach(t => t.classList.remove('active'));
-      if(event && event.target.classList) event.target.classList.add('active');
+      currentCat = cat; document.querySelectorAll('#category-tabs .tab').forEach(t => t.classList.remove('active')); if(event && event.target.classList) event.target.classList.add('active');
       let html = '';
       for (let sub in MENU_DB[cat].subcategories) {
         MENU_DB[cat].subcategories[sub].forEach(i => {
-          let saleP = i.price - (i.discount || 0);
-          let pUI = i.discount > 0 ? `<span class="old-price">${i.price}៛</span>${saleP}៛` : `${i.price}៛`;
-          let imgUI = i.image ? `<img src="${i.image}" style="width:100%; height:120px; object-fit:contain; margin-bottom:10px;">` : ``;
+          let saleP = i.price - (i.discount || 0); let pUI = i.discount > 0 ? `<span class="old-price">${i.price}៛</span>${saleP}៛` : `${i.price}៛`;
+          let imgUI = i.image ? `<img src="${i.image}" loading="lazy" style="width:100%; height:120px; object-fit:contain; margin-bottom:10px;">` : ``;
           html += `<div class="product-card" onclick="addToCart('${i.name}', ${saleP})">${imgUI}<h4 style="margin:5px 0;">${i.name}</h4><div class="price-tag">${pUI}</div></div>`;
         });
       }
@@ -415,8 +394,7 @@
     
     function calcTotal(sub) {
       if (appliedPromo && PROMO_DB[appliedPromo.code] && sub < PROMO_DB[appliedPromo.code].min_spend) { appliedPromo = null; if(typeof renderPromoUI === 'function') renderPromoUI(); }
-      let dis = appliedPromo ? sub * appliedPromo.val : 0; let final = sub - dis;
-      document.getElementById('discount-amt').innerText = '-' + dis + '៛'; document.getElementById('final-total').innerText = final + '៛'; return final;
+      let dis = appliedPromo ? sub * appliedPromo.val : 0; let final = sub - dis; document.getElementById('discount-amt').innerText = '-' + dis + '៛'; document.getElementById('final-total').innerText = final + '៛'; return final;
     }
 
     function goToCheckout() {
@@ -441,33 +419,58 @@
       if (inputVal === '' || cash <= 0) { remainText.innerText = finalTotal + '៛'; mixBanks.style.display = 'none'; } else if (remain > 0) { remainText.innerText = remain + '៛'; mixBanks.style.display = 'grid'; } else { selectPayMethod('cash'); } 
     }
 
-    // នេះជាកន្លែងបញ្ជូនទិន្នន័យវិក្កយបត្រថ្មី
+    // លុបបំបាត់ការបង្កើតលេខជាន់គ្នា (Desync) រវាង Frontend នឹង Backend
     function processFinalCheckout(method) {
       let sub = cart.reduce((s, i) => s + (i.price * i.qty), 0); let finalTotal = calcTotal(sub); let tableNo = document.getElementById('table-no').value;
-      let payload = { action: "order", invNo: currentEditingInv, table: tableNo, items: cart, subTotal: sub, discountAmount: appliedPromo ? sub * appliedPromo.val : 0, promoCode: appliedPromo ? appliedPromo.code : "គ្មាន", finalTotal: finalTotal, method: method };
       
       let currentTime = new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});
-      if (currentEditingInv) { let existingInv = ALL_HISTORY.find(x => x.inv === currentEditingInv); if (existingInv) { existingInv.items = JSON.parse(JSON.stringify(cart)); existingInv.totalRiel = finalTotal; existingInv.method = method; existingInv.table = tableNo; existingInv.time = currentTime; existingInv.status = method === 'មិនទាន់ទូទាត់' ? 'មិនទាន់ទូទាត់' : 'បានទូទាត់'; } } 
-      else { let nextNum = 1; ALL_HISTORY.forEach(h => { let match = h.inv.match(/#INV-(\d+)/); if(match) { let num = parseInt(match[1]); if(num >= nextNum) nextNum = num + 1; } }); let newInv = { inv: "#INV-" + ("000" + nextNum).slice(-3), table: tableNo, time: currentTime, date: getFormattedDate(), items: JSON.parse(JSON.stringify(cart)), totalRiel: finalTotal, method: method, status: method === 'មិនទាន់ទូទាត់' ? 'មិនទាន់ទូទាត់' : 'បានទូទាត់' }; ALL_HISTORY.unshift(newInv); }
-      
+      let currentDate = getFormattedDate();
+      let targetInvNo = currentEditingInv;
+
+      if (!targetInvNo) {
+         // បើជាវិក្កយបត្រថ្មីសន្លាង Frontend ជាអ្នកកសាងលេខ Invoice ហើយបញ្ជូនទៅ Backend ផ្ទាល់
+         let nextNum = 1; ALL_HISTORY.forEach(h => { let match = h.inv.match(/#INV-(\d+)/); if(match) { let num = parseInt(match[1]); if(num >= nextNum) nextNum = num + 1; } }); 
+         targetInvNo = "#INV-" + ("000" + nextNum).slice(-3);
+         let newInv = { inv: targetInvNo, table: tableNo, time: currentTime, date: currentDate, items: JSON.parse(JSON.stringify(cart)), totalRiel: finalTotal, method: method, status: method === 'មិនទាន់ទូទាត់' ? 'មិនទាន់ទូទាត់' : 'បានទូទាត់' }; 
+         ALL_HISTORY.unshift(newInv); if(ALL_HISTORY.length > 100) ALL_HISTORY.pop(); 
+      } else {
+         let existingInv = ALL_HISTORY.find(x => x.inv === targetInvNo); 
+         if (existingInv) { existingInv.items = JSON.parse(JSON.stringify(cart)); existingInv.totalRiel = finalTotal; existingInv.method = method; existingInv.table = tableNo; existingInv.time = currentTime; existingInv.status = method === 'មិនទាន់ទូទាត់' ? 'មិនទាន់ទូទាត់' : 'បានទូទាត់'; }
+      }
+
+      // បញ្ជូនលេខ targetInvNo ដែលត្រឹមត្រូវទៅកាន់ប្រព័ន្ធ Google Sheet
+      let payload = { action: "order", invNo: targetInvNo, table: tableNo, items: cart, subTotal: sub, discountAmount: appliedPromo ? sub * appliedPromo.val : 0, promoCode: appliedPromo ? appliedPromo.code : "គ្មាន", finalTotal: finalTotal, method: method };
+
       renderHistoryList(); cart = []; currentEditingInv = null; localStorage.removeItem('ptas_cart'); localStorage.removeItem('ptas_table'); localStorage.removeItem('ptas_editing'); appliedPromo = null; renderPromoUI(); updateCart(); switchView('order');
-      
       sendDataToCloud(payload, method === 'មិនទាន់ទូទាត់' ? "កំពុងរក្សាទុកបុងជំពាក់..." : "កំពុងដំណើរការទូទាត់ប្រាក់...");
     }
 
-    function switchView(view) {
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); if(event && event.target.classList) event.target.classList.add('active');
-      ['order', 'history', 'shift', 'expense', 'checkout', 'report'].forEach(v => { let el = document.getElementById('view-'+v); if(el) el.style.display = v===view ? 'flex' : 'none'; });
-    }
-
+    function switchView(view) { document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); if(event && event.target.classList) event.target.classList.add('active'); ['order', 'history', 'shift', 'expense', 'checkout', 'report'].forEach(v => { let el = document.getElementById('view-'+v); if(el) el.style.display = v===view ? 'flex' : 'none'; }); }
     function toggleHistDropdown() { let dd = document.getElementById('hist-dropdown'); dd.style.display = dd.style.display === 'none' ? 'block' : 'none'; }
     function filterHist(type) { currentHistFilter = type; let text = type === 'all' ? 'បង្ហាញទាំងអស់' : (type === 'paid' ? 'បានទូទាត់' : 'មិនទាន់ទូទាត់'); document.getElementById('hist-filter-text').innerText = text; document.getElementById('hist-dropdown').style.display = 'none'; renderHistoryList(); }
 
     function renderHistoryList() {
-      let list = ALL_HISTORY; if (currentHistFilter === 'paid') list = list.filter(x => x.status === 'បានទូទាត់'); if (currentHistFilter === 'unpaid') list = list.filter(x => x.status === 'មិនទាន់ទូទាត់');
+      let list = ALL_HISTORY; 
+      if (currentHistFilter === 'paid') list = list.filter(x => x.status === 'បានទូទាត់'); 
+      if (currentHistFilter === 'unpaid') list = list.filter(x => x.status === 'មិនទាន់ទូទាត់');
+      
       let html = ''; let lastDate = ''; 
       list.forEach((inv) => {
-         let invDate = inv.date || getFormattedDate(); if (invDate !== lastDate) { html += `<div class="date-separator">📅 ថ្ងៃទី ${invDate}</div>`; lastDate = invDate; }
+         let invDate = inv.date || getFormattedDate(); 
+         
+         if (invDate.includes("AM") || invDate.includes("PM") || invDate.includes(":")) {
+             invDate = getFormattedDate(); 
+             inv.date = invDate; 
+         }
+         
+         // បង្រួបបង្រួមទិន្នន័យចាស់៖ បើថ្ងៃខែចាស់មានតែ១ខ្ទង់ (ឧ. "1,Sep,26") វាត្រូវថែម "0" ពីមុខឱ្យទៅជា "01,Sep,26" ស្វ័យប្រវត្តិ
+         if (/^\d,/.test(invDate)) {
+             invDate = "0" + invDate;
+             inv.date = invDate;
+         }
+
+         if (invDate !== lastDate) { html += `<div class="date-separator">📅 ថ្ងៃទី ${invDate}</div>`; lastDate = invDate; }
+         
          let statusColor = inv.status === 'មិនទាន់ទូទាត់' ? 'var(--danger)' : '#28a745';
          html += `<div class="hist-card" onclick="showHistDetails('${inv.inv}', this)"><div><div style="font-weight:bold; font-size:15px; font-family:'Dangrek';">ការកម្មង់ ${inv.inv}</div><div class="hist-status" style="margin-top:5px; font-weight:bold; color: ${statusColor}; font-size:13px;">${inv.status}</div></div><div style="text-align:right;"><div style="font-weight:bold; font-size:18px; font-family:'Koulen';">${inv.totalRiel}៛</div><div class="text-muted" style="margin-top:5px;">${inv.time}</div></div></div>`;
       });
@@ -489,14 +492,24 @@
       let name = document.getElementById('exp-name').value; let amt = document.getElementById('exp-amount').value;
       if(!name || !amt) { showCustomAlert("⚠️ សូមបញ្ចូលឈ្មោះ និងតម្លៃចំណាយឱ្យបានគ្រប់គ្រាន់!"); return; }
       sendDataToCloud({ action: "expense", name: name, amount: Number(amt) }, "កំពុងកត់ត្រាចំណាយ...");
+      EXPENSE_DB.push({ name: name, amount: Number(amt), time: new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'}) });
       document.getElementById('exp-name').value = ''; document.getElementById('exp-amount').value = '';
     }
 
+    function showExpenseHistory() {
+      let html = `<h3 style="margin-top:0; font-family:'Dangrek';">📋 បញ្ជីចំណាយប្រចាំថ្ងៃ</h3>`;
+      if(EXPENSE_DB.length === 0) { html += `<p style="color:#777;">មិនទាន់មានការកត់ត្រាចំណាយថ្ងៃនេះទេ!</p>`; } 
+      else { EXPENSE_DB.forEach(ex => { html += `<div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding:8px 0; font-size:16px;"><span>${ex.name} <small style="color:#888;">(${ex.time})</small></span><b style="color:var(--danger);">${ex.amount.toLocaleString()}៛</b></div>`; }); }
+      showCustomAlert(html);
+    }
+
     function closeShift() {
+      // Frontend ជាអ្នកឆែកភាពត្រឹមត្រូវ បើមានជំពាក់វានឹងឃាំងនៅទីនេះ មិនបាច់ចាំដល់ Backend
       let unpaidCount = ALL_HISTORY.filter(x => x.status === 'មិនទាន់ទូទាត់').length;
       if(unpaidCount > 0) { showCustomAlert("⚠️ មិនអាចបិទវេនបានទេ! នៅសល់បុងជំពាក់ចំនួន " + unpaidCount + " មិនទាន់គិតលុយ។"); return; }
-      showCustomConfirm("តើអ្នកពិតជាចង់បិទវេន និងទម្លាក់របាយការណ៍មែនទេ?", function() {
-          sendDataToCloud({ action: "close_shift" }, "កំពុងដំណើរការបិទវេន...");
+      
+      showCustomConfirm("តើអ្នកពិតជាចង់បិទវេនប្រចាំថ្ងៃមែនទេ?", function() {
+          sendDataToCloud({ action: "close_shift" }, "កំពុងដំណើរការបិទវេន និងបោសសម្អាត...");
       });
     }
   </script>
