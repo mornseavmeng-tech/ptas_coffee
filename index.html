@@ -30,6 +30,7 @@
     .wave-dots span:nth-child(3) { animation-delay: 0.4s; }
     .wave-dots span:nth-child(4) { animation-delay: 0.6s; }
     @keyframes wave { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-12px); } }
+    @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
     .sidebar { width: 220px; background: var(--primary); color: white; display: flex; flex-direction: column; padding: 20px 0 20px 15px; box-sizing: border-box; overflow-y: auto; scrollbar-width: none; }
     .sidebar::-webkit-scrollbar { display: none; }
@@ -45,17 +46,14 @@
     .order-layout { display: flex; flex: 1; gap: 20px; }
     .product-section { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
     
-    /* កែប្រែប្រព័ន្ធ Cart មិនឱ្យធ្លាក់ចុះក្រោម និង Scroll ស្រួល */
     .cart-section { 
-      width: 350px; background: var(--card-bg); border-radius: 12px; padding: 15px; 
+      width: 350px; background: var(--card-bg); border-radius: 12px; padding: 12px 15px; 
       box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; 
-      height: 100%; max-height: 100%;  /* ប្រើ Height ចងឱ្យស្មើអេក្រង់ជានិច្ច */
+      height: 100%; max-height: 100%; 
       position: sticky; top: 0; box-sizing: border-box;
     }
     .cart-items { 
-      flex: 1; /* ពង្រីកយកកន្លែងដែលសល់ */
-      overflow-y: auto; /* បើក Scroll សម្រាប់តែទំនិញ */
-      -webkit-overflow-scrolling: touch; 
+      flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; 
       margin-top: 15px; border-top: 1px solid var(--border); padding-top: 10px; scrollbar-width: none; 
     }
     .cart-items::-webkit-scrollbar { display: none; }
@@ -98,7 +96,6 @@
     .text-muted { color: #888; font-size: 12px; }
     .date-separator { background: rgba(0, 86, 179, 0.1); color: var(--primary); padding: 8px 15px; border-radius: 8px; margin: 15px 0 10px 0; font-family: 'Dangrek', sans-serif; font-size: 15px; text-align: center; }
 
-    /* Artboard 2: Drawer Modal សម្រាប់ប្រវត្តិចំណាយ (មាន Animation) */
     .drawer-overlay { 
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
       background: rgba(0,0,0,0.4); z-index: 9999; 
@@ -126,23 +123,26 @@
     .hist-list-scroll::-webkit-scrollbar { display: none; }
     .hist-right-pane { flex: 1.5; padding: 30px; background: var(--bg); overflow-y: auto; -webkit-overflow-scrolling: touch; min-height: 0; }
 
-    /* នៅពេលកាន់ Tablet បញ្ឈរ វានឹងរៀបជាទម្រង់ លើ-ក្រោម វិញដើម្បីកុំឱ្យកៀប */
     @media (max-width: 900px) {
       .hist-layout { flex-direction: column; }
       .hist-left-pane { flex: none; height: 45%; border-right: none; border-bottom: 2px solid var(--border); }
       .hist-right-pane { flex: 1; padding: 15px; }
     }
+    
+    /* តារាង Artboard 2 */
+    .summary-table { width:100%; text-align:left; border-collapse: collapse; font-size:16px; font-family:'Dangrek'; }
+    .summary-table th { padding-bottom:10px; border-bottom: 2px solid #7c98b6; color:#333; font-weight:bold; }
+    .summary-table td { padding:12px 0; border-bottom: 1px solid var(--border); color:#555; }
+    .summary-table tr:last-child td { border-bottom: none; }
   </style>
 </head>
 <body>
 
-  <!-- Splash Screen -->
   <div id="splash-screen">
     <img src="https://i.postimg.cc/Y9qXGCT1/3-(2).png" alt="PTAS Logo" class="splash-logo">
     <div class="wave-dots"><span></span><span></span><span></span><span></span></div>
   </div>
 
-  <!-- Sidebar មានបញ្ចូល Icon FontAwesome -->
   <div class="sidebar" id="app-sidebar" style="display:none;">
     <div class="logo"><img src="https://i.postimg.cc/Y9qXGCT1/3-(2).png" alt="PTAS COFFEE" style="width: 80%; max-width: 150px; margin: 0 auto; display: block;"></div>
     <button class="nav-btn active" onclick="switchView('order')"><i class="fa-solid fa-mug-hot"></i> អាហារ & ភេសជ្ជៈ</button>
@@ -153,7 +153,6 @@
     <button class="nav-btn" id="btn-logout" style="color: #ff4d4d;" onclick="logout()"><i class="fa-solid fa-door-open"></i> ចាកចេញ</button>
   </div>
 
-  <!-- Main Views -->
   <div class="main-content" id="view-order" style="display:none;">
     <div class="order-layout">
       <div class="product-section">
@@ -204,15 +203,27 @@
     </div>
   </div>
 
-  <div class="main-content" id="view-shift" style="display:none; justify-content:center; align-items:center;">
-    <div class="form-box" style="text-align:center;">
-      <h2 style="margin-top:0;"><i class="fa-solid fa-user-xmark" style="color:var(--danger); margin-right:10px;"></i>បិទវេនប្រចាំថ្ងៃ</h2>
-      <p style="color:#666; margin-bottom:30px;">ការបិទវេនអាចធ្វើបានតែ ១ ដងក្នុងមួយថ្ងៃ និងពេលមានទំនិញលក់បានប៉ុណ្ណោះ។</p>
-      <button class="pay-btn" onclick="closeShift()" style="background:var(--danger); padding:15px; font-size:18px; width:100%;">បិទវេនឥឡូវនេះ</button>
+  <!-- Artboard 1: បិទវេនប្រចាំថ្ងៃ -->
+  <div class="main-content" id="view-shift" style="display:none; justify-content:center; align-items:center; background-color: #ebf1f6;">
+    <div class="form-box" style="text-align:center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 40px; border: 1px dashed #7c98b6;">
+      <h2 style="margin-top:0; display:flex; align-items:center; justify-content:center; gap:10px; color:#333;"><i class="fa-solid fa-user-xmark" style="color:var(--danger);"></i>បិទវេនប្រចាំថ្ងៃ</h2>
+      <p style="color:#666; margin-bottom:30px; font-size:16px;">ការបិទវេនអាចធ្វើបានតែ ១ ដងក្នុងមួយថ្ងៃ និងពេលមានទំនិញលក់បានប៉ុណ្ណោះ។</p>
+      <button class="pay-btn" onclick="closeShift()" style="background:var(--danger); padding:15px; font-size:18px; width:100%; border-radius:8px;">បិទវេនឥឡូវនេះ</button>
     </div>
   </div>
 
-  <!-- Artboard 1: ផ្ទាំងកត់ត្រាចំណាយ -->
+  <!-- Artboard 2: Modal បិទវេនរួចរាល់ -->
+  <div id="close-shift-modal" class="drawer-overlay" style="align-items: center; justify-content: center; display:none;">
+    <div class="form-box" style="max-width: 600px; width:95%; max-height: 90vh; background: #ebf1f6; padding: 25px; border-radius:12px; display:flex; flex-direction:column; animation: scaleIn 0.3s ease;">
+       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+          <h1 style="margin:0; font-family:'Koulen'; font-size:28px; color:#333;">បិទវេនរួចរាល់</h1>
+          <i class="fa-solid fa-xmark" style="font-size:28px; cursor:pointer; color:#7c98b6;" onclick="closeShiftModalUI()"></i>
+       </div>
+       <div id="close-shift-content" style="flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding-right:5px;"></div>
+       <button class="pay-btn" style="background:var(--primary); margin-top:20px; padding:15px; font-size:18px;" onclick="closeShiftModalUI()">យល់ព្រម</button>
+    </div>
+  </div>
+
   <div class="main-content" id="view-expense" style="display:none; justify-content:center; align-items:center; position:relative; background-color: #ebf1f6;">
     <button onclick="toggleExpenseDrawer()" style="position:absolute; top:20px; right:20px; background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-family:'Dangrek'; font-size:16px; display:flex; align-items:center; gap:8px;">
       <i class="fa-solid fa-clock-rotate-left"></i> មើលប្រវត្តិចំណាយ
@@ -227,7 +238,6 @@
     </div>
   </div>
 
-  <!-- Artboard 2: Modal Drawer សម្រាប់បញ្ជីចំណាយ -->
   <div id="expense-drawer" class="drawer-overlay">
     <div class="drawer-content">
        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 30px;">
@@ -266,28 +276,7 @@
     </div>
   </div>
 
-  <div class="main-content" id="view-checkout" style="display:none; padding:0;">
-    <div style="display:flex; height:100%; width:100%;">
-      <div style="flex:1; padding:20px; border-right:1px solid var(--border); background:white;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
-           <h2 style="margin:0; cursor:pointer; color:var(--text); display:flex; align-items:center; gap:10px;" onclick="switchView('order')">
-             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg> ទូទាត់លុយ
-           </h2>
-           <h2 style="margin:0; color:var(--primary);" id="checkout-total">0៛</h2>
-        </div>
-        <button class="pay-btn" style="width:100%; margin-bottom:15px; background:var(--primary); color:white;" onclick="selectPayMethod('cash')">លុយក្រៅ</button>
-        <button class="pay-btn" style="width:100%; margin-bottom:15px; background:white; color:var(--primary); border:1px solid var(--primary);" onclick="selectPayMethod('mix')">លុយក្រៅ & QR</button>
-        <button class="pay-btn" style="width:100%; margin-bottom:15px; background-color: #d0021b; color:white; display:flex; justify-content:center; align-items:center; gap:10px;" onclick="selectPayMethod('qr')">
-            <img src="https://i.postimg.cc/3wbmKjQH/qr.png" alt="QR" style="height: 28px;"> QR
-        </button>
-        <button class="pay-btn" style="width:100%; background:var(--text); color:white; margin-top:30px;" onclick="processFinalCheckout('មិនទាន់ទូទាត់')">មិនទាន់ទូទាត់</button>
-      </div>
-      <div style="flex:1; padding:20px; background:var(--bg);" id="checkout-right-pane"></div>
-    </div>
-  </div>
-
   <script>
-    // ⚠️ បញ្ជាក់៖ Link នេះម៉េងបានដូរត្រូវរួចហើយ
     const API_URL = "https://script.google.com/macros/s/AKfycbxKfvs9Hpas32ZdNC2FPRdhlSK-7fuOHcSIrFMt2ykwPUavfsb-Q5mdje8jQTQNNRcQ/exec";
 
     let MENU_DB = {}; let PROMO_DB = {}; let UNPAID_DB = []; let HISTORY_DB = []; let EXPENSE_DB = []; let ALL_HISTORY = [];
@@ -324,7 +313,13 @@
       try {
         let res = await fetch(API_URL, { method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify(payload) });
         let result = await res.json();
-        if(result.status === 'success') { showCustomAlert(result.message, function() { if(payload.action === 'close_shift') location.reload(); }); } 
+        if(result.status === 'success') { 
+            if(payload.action === 'close_shift') {
+                renderCloseShiftSummary(JSON.parse(result.message)); // Render ផ្ទាំង Artboard 2
+            } else {
+                showCustomAlert(result.message);
+            }
+        } 
         else { showCustomAlert("❌ កំហុសបច្ចេកទេស: " + result.message); }
       } catch(e) { showCustomAlert("❌ បរាជ័យក្នុងការភ្ជាប់ទៅកាន់ Server!"); }
     }
@@ -392,14 +387,30 @@
     function calcTotal(sub) { if (appliedPromo && PROMO_DB[appliedPromo.code] && sub < PROMO_DB[appliedPromo.code].min_spend) { appliedPromo = null; if(typeof renderPromoUI === 'function') renderPromoUI(); } let dis = appliedPromo ? sub * appliedPromo.val : 0; let final = sub - dis; document.getElementById('discount-amt').innerText = '-' + dis + '៛'; document.getElementById('final-total').innerText = final + '៛'; return final; }
 
     function goToCheckout() { if(cart.length === 0) { showCustomAlert("🛒 កន្ត្រកទទេ! សូមជ្រើសរើសទំនិញសិន។"); return; } let sub = cart.reduce((s, i) => s + (i.price * i.qty), 0); document.getElementById('checkout-total').innerText = calcTotal(sub) + '៛'; switchView('checkout'); selectPayMethod('cash'); }
-    function selectPayMethod(type) { let rightPane = document.getElementById('checkout-right-pane'); let finalTotal = parseInt(document.getElementById('final-total').innerText); let banksHtml = BANKS.map(b => `<button class="pay-btn" style="background-color: ${b.color}; color: white; padding: 10px; display: flex; justify-content: center; align-items: center; height: 55px;" onclick="processFinalCheckout('QR - ${b.name}')"><img src="${b.image}" alt="${b.name}" style="max-height: 35px; max-width: 100%;"></button>`).join(''); let mixBanksHtml = BANKS.map(b => `<button class="pay-btn" style="background-color: ${b.color}; color: white; padding: 10px; display: flex; justify-content: center; align-items: center; height: 55px;" onclick="processFinalCheckout('Mix QR - ${b.name}')"><img src="${b.image}" alt="${b.name}" style="max-height: 35px; max-width: 100%;"></button>`).join(''); if(type === 'cash') { rightPane.innerHTML = `<h2 style="text-align:center;">លុយក្រៅ</h2><h3 style="text-align:center; margin-top:50px;">បញ្ជាក់ការបង់លុយ</h3><div style="display:flex; justify-content:center; gap:10px; margin-top:30px;"><button class="pay-btn" style="background:#6c757d; width:100px;" onclick="switchView('order')">បោះបង់</button><button class="pay-btn" style="background:var(--primary); width:100px;" onclick="processFinalCheckout('លុយក្រៅសុទ្ធ')">យល់ព្រម</button></div>`; } else if (type === 'qr') { rightPane.innerHTML = `<h2>QR</h2><div class="bank-grid">${banksHtml}</div>`; } else if (type === 'mix') { rightPane.innerHTML = `<h2>លុយក្រៅ & QR</h2><input type="number" id="mix-cash-input" placeholder="បញ្ចូលទឹកប្រាក់លុយក្រៅ..." style="width:100%; padding:10px; font-size:16px; border:1px solid var(--border); border-radius:8px; margin-bottom:15px;" onkeyup="calcCheckoutMix(${finalTotal})"><p style="color:var(--danger); font-size:18px; font-weight:bold;">ខ្វះ: <span id="mix-remain-text">${finalTotal}៛</span></p><div class="bank-grid" id="mix-banks-container" style="display:none;">${mixBanksHtml}</div>`; } }
+    
+    // កំណត់ប៊ូតុង Mix QR ឲ្យមានភ្ជាប់តម្លៃលុយក្រៅ និង QR
+    function selectPayMethod(type) { 
+        let rightPane = document.getElementById('checkout-right-pane'); let finalTotal = parseInt(document.getElementById('final-total').innerText); 
+        let banksHtml = BANKS.map(b => `<button class="pay-btn" style="background-color: ${b.color}; color: white; padding: 10px; display: flex; justify-content: center; align-items: center; height: 55px;" onclick="processFinalCheckout('QR - ${b.name}')"><img src="${b.image}" alt="${b.name}" style="max-height: 35px; max-width: 100%;"></button>`).join(''); 
+        let mixBanksHtml = BANKS.map(b => `<button class="pay-btn" style="background-color: ${b.color}; color: white; padding: 10px; display: flex; justify-content: center; align-items: center; height: 55px;" onclick="processFinalCheckout('Mix QR - ${b.name}', document.getElementById('mix-cash-input').value, ${finalTotal} - document.getElementById('mix-cash-input').value)"><img src="${b.image}" alt="${b.name}" style="max-height: 35px; max-width: 100%;"></button>`).join(''); 
+        
+        if(type === 'cash') { rightPane.innerHTML = `<h2 style="text-align:center;">លុយក្រៅ</h2><h3 style="text-align:center; margin-top:50px;">បញ្ជាក់ការបង់លុយ</h3><div style="display:flex; justify-content:center; gap:10px; margin-top:30px;"><button class="pay-btn" style="background:#6c757d; width:100px;" onclick="switchView('order')">បោះបង់</button><button class="pay-btn" style="background:var(--primary); width:100px;" onclick="processFinalCheckout('លុយក្រៅសុទ្ធ')">យល់ព្រម</button></div>`; } 
+        else if (type === 'qr') { rightPane.innerHTML = `<h2>QR</h2><div class="bank-grid">${banksHtml}</div>`; } 
+        else if (type === 'mix') { rightPane.innerHTML = `<h2>លុយក្រៅ & QR</h2><input type="number" id="mix-cash-input" placeholder="បញ្ចូលទឹកប្រាក់លុយក្រៅ..." style="width:100%; padding:10px; font-size:16px; border:1px solid var(--border); border-radius:8px; margin-bottom:15px;" onkeyup="calcCheckoutMix(${finalTotal})"><p style="color:var(--danger); font-size:18px; font-weight:bold;">ខ្វះ: <span id="mix-remain-text">${finalTotal}៛</span></p><div class="bank-grid" id="mix-banks-container" style="display:none;">${mixBanksHtml}</div>`; } 
+    }
     function calcCheckoutMix(finalTotal) { let inputVal = document.getElementById('mix-cash-input').value; let cash = Number(inputVal); let remain = finalTotal - cash; let remainText = document.getElementById('mix-remain-text'); let mixBanks = document.getElementById('mix-banks-container'); if (inputVal === '' || cash <= 0) { remainText.innerText = finalTotal + '៛'; mixBanks.style.display = 'none'; } else if (remain > 0) { remainText.innerText = remain + '៛'; mixBanks.style.display = 'grid'; } else { selectPayMethod('cash'); } }
 
-    function processFinalCheckout(method) {
+    function processFinalCheckout(method, mixCash, mixQr) {
       let sub = cart.reduce((s, i) => s + (i.price * i.qty), 0); let finalTotal = calcTotal(sub); let tableNo = document.getElementById('table-no').value;
       let currentTime = new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'}); let currentDate = getFormattedDate(); let targetInvNo = currentEditingInv;
-      if (!targetInvNo) { let nextNum = 1; ALL_HISTORY.forEach(h => { let match = h.inv.match(/#INV-(\d+)/); if(match) { let num = parseInt(match[1]); if(num >= nextNum) nextNum = num + 1; } }); targetInvNo = "#INV-" + ("000" + nextNum).slice(-3); let newInv = { inv: targetInvNo, table: tableNo, time: currentTime, date: currentDate, items: JSON.parse(JSON.stringify(cart)), totalRiel: finalTotal, method: method, status: method === 'មិនទាន់ទូទាត់' ? 'មិនទាន់ទូទាត់' : 'បានទូទាត់' }; ALL_HISTORY.unshift(newInv); if(ALL_HISTORY.length > 100) ALL_HISTORY.pop(); } else { let existingInv = ALL_HISTORY.find(x => x.inv === targetInvNo); if (existingInv) { existingInv.items = JSON.parse(JSON.stringify(cart)); existingInv.totalRiel = finalTotal; existingInv.method = method; existingInv.table = tableNo; existingInv.time = currentTime; existingInv.status = method === 'មិនទាន់ទូទាត់' ? 'មិនទាន់ទូទាត់' : 'បានទូទាត់'; } }
-      let payload = { action: "order", invNo: targetInvNo, table: tableNo, items: cart, subTotal: sub, discountAmount: appliedPromo ? sub * appliedPromo.val : 0, promoCode: appliedPromo ? appliedPromo.code : "គ្មាន", finalTotal: finalTotal, method: method };
+      
+      let mCash = mixCash ? parseInt(mixCash) : 0;
+      let mQr = mixQr ? parseInt(mixQr) : 0;
+
+      if (!targetInvNo) { let nextNum = 1; ALL_HISTORY.forEach(h => { let match = h.inv.match(/#INV-(\d+)/); if(match) { let num = parseInt(match[1]); if(num >= nextNum) nextNum = num + 1; } }); targetInvNo = "#INV-" + ("000" + nextNum).slice(-3); let newInv = { inv: targetInvNo, table: tableNo, time: currentTime, date: currentDate, items: JSON.parse(JSON.stringify(cart)), totalRiel: finalTotal, method: method, mixCash: mCash, mixQr: mQr, status: method === 'មិនទាន់ទូទាត់' ? 'មិនទាន់ទូទាត់' : 'បានទូទាត់' }; ALL_HISTORY.unshift(newInv); if(ALL_HISTORY.length > 100) ALL_HISTORY.pop(); } 
+      else { let existingInv = ALL_HISTORY.find(x => x.inv === targetInvNo); if (existingInv) { existingInv.items = JSON.parse(JSON.stringify(cart)); existingInv.totalRiel = finalTotal; existingInv.method = method; existingInv.mixCash = mCash; existingInv.mixQr = mQr; existingInv.table = tableNo; existingInv.time = currentTime; existingInv.status = method === 'មិនទាន់ទូទាត់' ? 'មិនទាន់ទូទាត់' : 'បានទូទាត់'; } }
+      
+      let payload = { action: "order", invNo: targetInvNo, table: tableNo, items: cart, subTotal: sub, discountAmount: appliedPromo ? sub * appliedPromo.val : 0, promoCode: appliedPromo ? appliedPromo.code : "គ្មាន", finalTotal: finalTotal, method: method, mixCash: mCash, mixQr: mQr };
       renderHistoryList(); cart = []; currentEditingInv = null; localStorage.removeItem('ptas_cart'); localStorage.removeItem('ptas_table'); localStorage.removeItem('ptas_editing'); appliedPromo = null; renderPromoUI(); updateCart(); switchView('order');
       sendDataToCloud(payload, method === 'មិនទាន់ទូទាត់' ? "កំពុងរក្សាទុកបុងជំពាក់..." : "កំពុងដំណើរការទូទាត់ប្រាក់...");
     }
@@ -420,12 +431,37 @@
       document.getElementById('history-list').innerHTML = html || '<p style="text-align:center; color:#999; margin-top:20px;">គ្មានទិន្នន័យ</p>';
     }
 
+    // មុខងារនេះបានកែសម្រួលដើម្បីបង្ហាញ "លុយក្រៅ & Qr" យ៉ាងច្បាស់នៅក្នុងប្រវត្តិ
     function showHistDetails(invNo, el) {
       document.querySelectorAll('.hist-card').forEach(c => c.classList.remove('active')); el.classList.add('active'); let inv = ALL_HISTORY.find(x => x.inv === invNo); if(!inv) return;
+      
       let itemsHtml = ''; let totalQty = 0;
       if(inv.items && inv.items.length > 0) { inv.items.forEach(i => { totalQty += i.qty; itemsHtml += `<div style="display:flex; justify-content:space-between; margin-bottom:15px; font-size:16px;"><div>${i.qty} x ${i.name}</div><div>${(i.price * i.qty)}៛</div></div>`; }); } else { itemsHtml = `<div style="color:#999; text-align:center;">(ទិន្នន័យមុខទំនិញត្រូវបានលាក់ដោយសារទំហំផ្ទុក)</div>`; }
       let actionBtns = ''; if (inv.status === 'មិនទាន់ទូទាត់') { actionBtns = `<div style="display:flex; gap:15px; margin-top:30px;"><button class="pay-btn" style="flex:1; background: #6c757d; color:white; padding:15px; font-size:18px; border-radius:8px;" onclick="resumeOrder('${inv.inv}', 'order')">បន្ថែមទំនិញ</button><button class="pay-btn" style="flex:1; background: var(--primary); color:white; padding:15px; font-size:18px; border-radius:8px;" onclick="resumeOrder('${inv.inv}', 'checkout')">ទូទាត់លុយ</button></div>`; }
-      let rightPane = `<h1 style="margin:0; font-size:32px;">ការកម្មង់ ${inv.inv}</h1><div style="color: ${inv.status === 'បានទូទាត់' ? '#28a745' : 'var(--danger)'}; font-weight:bold; margin-top:5px; font-size:18px;">${inv.status}</div><h3 style="margin-top:40px; border-bottom:2px solid var(--border); padding-bottom:10px;">ព័ត៌មានលម្អិត</h3><div style="display:flex; justify-content:space-between; text-align:center; margin:30px 0;"><div><div class="text-muted" style="margin-bottom:10px;">លេខតុ</div><div style="font-size:28px; font-weight:bold;">${inv.table}</div></div><div><div class="text-muted" style="margin-bottom:10px;">ចំនួនទំនិញ</div><div style="font-size:28px; font-weight:bold;">${totalQty || '-'}</div></div><div><div class="text-muted" style="margin-bottom:10px;">ទូទាត់</div><div style="font-size:28px; font-weight:bold; color:var(--primary);">${inv.method || 'មិនទាន់'}</div></div></div><div style="display:flex; justify-content:space-between; font-weight:bold; border-bottom:2px solid var(--border); padding-bottom:15px; margin-bottom:20px; color:#666;"><div>មុខទំនិញ</div><div>តម្លៃ</div></div>${itemsHtml}<div style="display:flex; justify-content:space-between; font-weight:bold; font-size:24px; border-top:2px dashed var(--border); padding-top:20px; margin-top:20px;"><div>សរុប</div><div>${inv.totalRiel}៛</div></div>${actionBtns}`;
+      
+      let methodStr = inv.method || 'មិនទាន់';
+      if(methodStr.includes('Mix')) methodStr = 'លុយក្រៅ & QR';
+      
+      let rightPane = `
+        <h1 style="margin:0; font-size:32px;">ការកម្មង់ ${inv.inv}</h1>
+        <div style="color: ${inv.status === 'បានទូទាត់' ? '#28a745' : 'var(--danger)'}; font-weight:bold; margin-top:5px; font-size:18px;">${inv.status}</div>
+        <h3 style="margin-top:40px; border-bottom:2px solid var(--border); padding-bottom:10px;">ព័ត៌មានលម្អិត</h3>
+        <div style="display:flex; justify-content:space-between; text-align:center; margin:30px 0;">
+           <div><div class="text-muted" style="margin-bottom:10px;">លេខតុ</div><div style="font-size:28px; font-weight:bold;">${inv.table}</div></div>
+           <div><div class="text-muted" style="margin-bottom:10px;">ចំនួនទំនិញ</div><div style="font-size:28px; font-weight:bold;">${totalQty || '-'}</div></div>
+           <div><div class="text-muted" style="margin-bottom:10px;">ទូទាត់</div><div style="font-size:28px; font-weight:bold; color:var(--primary);">${methodStr}</div></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-weight:bold; border-bottom:2px solid var(--border); padding-bottom:15px; margin-bottom:20px; color:#666;"><div>មុខទំនិញ</div><div>តម្លៃ</div></div>
+        ${itemsHtml}
+        <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:24px; border-top:2px dashed var(--border); padding-top:20px; margin-top:20px;">
+           <div>សរុប</div>
+           <div style="text-align:right;">
+             ${inv.totalRiel}៛
+             ${(inv.method && inv.method.includes('Mix')) ? `<div style="font-size:16px; color:#666; font-weight:normal; margin-top:5px; font-family:'Dangrek';">លុយក្រៅ ${inv.mixCash}៛ & QR ${inv.mixQr}៛</div>` : ''}
+           </div>
+        </div>
+        ${actionBtns}
+      `;
       document.getElementById('history-details-pane').innerHTML = rightPane;
     }
 
@@ -439,44 +475,25 @@
       document.getElementById('exp-name').value = ''; document.getElementById('exp-amount').value = '';
     }
 
-    // មុខងារបង្ហាញផ្ទាំង Modal ប្រវត្តិចំណាយ (ប្រើ Class ដើម្បីលោត Animation)
     function toggleExpenseDrawer() {
       let drawer = document.getElementById('expense-drawer');
-      if (!drawer.classList.contains('active')) {
-        renderExpenseDrawer();
-        drawer.classList.add('active');
-      } else {
-        drawer.classList.remove('active');
-      }
+      if (!drawer.classList.contains('active')) { renderExpenseDrawer(); drawer.style.display = 'flex'; setTimeout(() => drawer.classList.add('active'), 10); } 
+      else { drawer.classList.remove('active'); setTimeout(() => drawer.style.display = 'none', 300); }
     }
     
-    // អនុញ្ញាតឱ្យចុចលើផ្ទៃពណ៌ខ្មៅខាងក្រៅ ដើម្បីបិទផ្ទាំងចំណាយ
     window.addEventListener('click', function(e) {
-      let drawer = document.getElementById('expense-drawer');
-      if (e.target === drawer) {
-        toggleExpenseDrawer();
-      }
+      let expDrawer = document.getElementById('expense-drawer');
+      if (e.target === expDrawer && expDrawer.classList.contains('active')) { toggleExpenseDrawer(); }
     });
 
     function renderExpenseDrawer() {
       let html = '';
-      if(EXPENSE_DB.length === 0) { 
-          html = `<p style="text-align:center; color:#777; margin-top:50px; font-size:18px;">មិនទាន់មានការកត់ត្រាចំណាយថ្ងៃនេះទេ!</p>`; 
-      } else { 
-          EXPENSE_DB.forEach(ex => { 
-              html += `
-              <div class="exp-list-card">
-                 <div class="exp-title">${ex.name}</div>
-                 <div style="text-align:right;">
-                    <div class="exp-amount">${ex.amount.toLocaleString()}៛</div>
-                    <div class="exp-time">${ex.time}</div>
-                 </div>
-              </div>`; 
-          }); 
-      }
+      if(EXPENSE_DB.length === 0) { html = `<p style="text-align:center; color:#777; margin-top:50px; font-size:18px;">មិនទាន់មានការកត់ត្រាចំណាយថ្ងៃនេះទេ!</p>`; } 
+      else { EXPENSE_DB.forEach(ex => { html += `<div class="exp-list-card"><div class="exp-title">${ex.name}</div><div style="text-align:right;"><div class="exp-amount">${ex.amount.toLocaleString()}៛</div><div class="exp-time">${ex.time}</div></div></div>`; }); }
       document.getElementById('expense-list-content').innerHTML = html;
     }
 
+    // មុខងារបិទវេន (បង្ហាញ Artboard 2 បន្ទាប់ពីទាញទិន្នន័យបាន)
     function closeShift() {
       let unpaidCount = ALL_HISTORY.filter(x => x.status === 'មិនទាន់ទូទាត់').length;
       if(unpaidCount > 0) { showCustomAlert("⚠️ មិនអាចបិទវេនបានទេ! នៅសល់បុងជំពាក់ចំនួន " + unpaidCount + " មិនទាន់គិតលុយ។"); return; }
@@ -484,6 +501,41 @@
       showCustomConfirm("តើអ្នកពិតជាចង់បិទវេនប្រចាំថ្ងៃមែនទេ?", function() {
           sendDataToCloud({ action: "close_shift" }, "កំពុងដំណើរការបិទវេន និងបោសសម្អាត...");
       });
+    }
+
+    function renderCloseShiftSummary(data) {
+       let html = `
+         <div style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #7c98b6;">
+            <table class="summary-table">
+               <tr><th>ការទូទាត់</th><th style="text-align:center;">ចំនួន</th><th style="text-align:right;">សរុប</th></tr>
+               <tr><td>លុយក្រៅ</td><td style="text-align:center;">${data.cashCount}</td><td style="text-align:right;">${data.cashTotal.toLocaleString()}៛</td></tr>
+               <tr><td>លុយក្រៅ & QR</td><td style="text-align:center;">${data.mixCount}</td><td style="text-align:right;">${data.mixCashTotal.toLocaleString()}៛ & ${data.mixQrTotal.toLocaleString()}៛</td></tr>
+               <tr><td>QR</td><td style="text-align:center;">${data.qrCount}</td><td style="text-align:right;">${data.qrTotal.toLocaleString()}៛</td></tr>
+            </table>
+         </div>
+         
+         <div style="background: white; border-radius: 12px; padding: 20px; border: 1px solid #7c98b6;">
+            <table class="summary-table">
+               <tr><th>ឈ្មោះទំនិញ</th><th style="text-align:center;">ចំនួន</th><th style="text-align:right;">សរុប</th></tr>
+       `;
+       
+       if(data.itemsList.length === 0) {
+           html += `<tr><td colspan="3" style="text-align:center; color:#999; padding:20px 0;">មិនមានទំនិញលក់ចេញទេថ្ងៃនេះ</td></tr>`;
+       } else {
+           data.itemsList.forEach(item => {
+               html += `<tr><td>${item.name}</td><td style="text-align:center;">${item.qty}</td><td style="text-align:right;">${item.amount.toLocaleString()}៛</td></tr>`;
+           });
+       }
+       html += `</table></div>`;
+       
+       document.getElementById('close-shift-content').innerHTML = html;
+       let modal = document.getElementById('close-shift-modal');
+       modal.style.display = 'flex';
+       setTimeout(() => modal.classList.add('active'), 10);
+    }
+
+    function closeShiftModalUI() {
+       location.reload(); 
     }
   </script>
 </body>
