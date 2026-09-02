@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @import url('https://fonts.googleapis.com/css2?family=Dangrek&family=Koulen&display=swap');
     
     * { touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -179,12 +180,18 @@
       .cart-section.active { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
       .close-cart-btn { display: block !important; }
 
-      .hist-right-pane {
+      /* តម្រៀបប៊ូតុង និងជម្រើសធនាគារលើក្រោម (សម្រាប់ផ្ទាំង Checkout) */
+      .hist-layout { flex-direction: column; }
+      .hist-left-pane { flex: none; height: auto; border-right: none; border-bottom: 2px solid var(--border); padding-bottom: 20px; }
+      .hist-right-pane { flex: 1; padding: 20px 0; }
+
+      /* ផ្ទាំងប្រវត្តិលម្អិត លោតពេញអេក្រង់ដាច់ដោយឡែក (សម្រាប់តែផ្ទាំង History ប៉ុណ្ណោះ) */
+      #history-details-pane {
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg);
         z-index: 99999; transform: translateX(100%); transition: transform 0.3s ease;
         padding: 20px; box-sizing: border-box; overflow-y: auto;
       }
-      .hist-right-pane.active { transform: translateX(0); }
+      #history-details-pane.active { transform: translateX(0); }
     }
 
     @media (min-width: 901px) {
@@ -367,21 +374,30 @@
     ];
 
     function showCustomAlert(msg, callback) {
-      let overlay = document.createElement('div'); overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; justify-content:center; align-items:center; z-index:9999999;';
-      let box = document.createElement('div'); box.style.cssText = 'background:white; padding:25px; border-radius:12px; text-align:center; width:80%; max-width:320px; box-shadow:0 5px 25px rgba(0,0,0,0.3);';
+      let overlay = document.createElement('div'); overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; justify-content:center; align-items:center; z-index:9999999; animation: fadeIn 0.2s ease-out;';
+      let box = document.createElement('div'); box.style.cssText = 'background:white; padding:25px; border-radius:12px; text-align:center; width:80%; max-width:320px; box-shadow:0 5px 25px rgba(0,0,0,0.3); animation: scaleIn 0.2s ease-out;';
       box.innerHTML = `<p style="font-family:'Dangrek'; font-size:18px; color:#333; margin-bottom:20px; line-height:1.5; white-space:pre-line; text-align:left;">${msg}</p>`;
-      let btn = document.createElement('button'); btn.style.cssText = 'background:var(--primary); color:white; border:none; padding:12px 30px; border-radius:8px; font-family:"Dangrek"; font-size:18px; cursor:pointer; width:100%;';
+      let btn = document.createElement('button'); btn.style.cssText = 'background:var(--primary); color:white; border:none; padding:12px 30px; border-radius:8px; font-family:"Dangrek"; font-size:18px; cursor:pointer; width:100%; transition: transform 0.1s;';
+      btn.onmousedown = () => btn.style.transform = "scale(0.95)";
+      btn.onmouseup = () => btn.style.transform = "scale(1)";
       btn.innerText = 'យល់ព្រម (OK)'; btn.onclick = function() { document.body.removeChild(overlay); if(callback) callback(); };
       box.appendChild(btn); overlay.appendChild(box); document.body.appendChild(overlay);
     }
 
     function showCustomConfirm(msg, callback) {
-      let overlay = document.createElement('div'); overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; justify-content:center; align-items:center; z-index:9999999;';
-      let box = document.createElement('div'); box.style.cssText = 'background:white; padding:25px; border-radius:12px; text-align:center; width:80%; max-width:300px; box-shadow:0 5px 25px rgba(0,0,0,0.3);';
+      let overlay = document.createElement('div'); overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; justify-content:center; align-items:center; z-index:9999999; animation: fadeIn 0.2s ease-out;';
+      let box = document.createElement('div'); box.style.cssText = 'background:white; padding:25px; border-radius:12px; text-align:center; width:80%; max-width:300px; box-shadow:0 5px 25px rgba(0,0,0,0.3); animation: scaleIn 0.2s ease-out;';
       box.innerHTML = `<p style="font-family:'Dangrek'; font-size:20px; color:#333; margin-bottom:20px;">${msg}</p>`;
       let btnGroup = document.createElement('div'); btnGroup.style.cssText = 'display:flex; gap:10px; justify-content:center;';
-      let btnYes = document.createElement('button'); btnYes.style.cssText = 'flex:1; background:var(--danger); color:white; border:none; padding:10px; border-radius:8px; font-family:"Dangrek"; font-size:16px; cursor:pointer;'; btnYes.innerText = 'យល់ព្រម'; btnYes.onclick = function() { document.body.removeChild(overlay); if(callback) callback(); };
-      let btnNo = document.createElement('button'); btnNo.style.cssText = 'flex:1; background:#6c757d; color:white; border:none; padding:10px; border-radius:8px; font-family:"Dangrek"; font-size:16px; cursor:pointer;'; btnNo.innerText = 'បោះបង់'; btnNo.onclick = function() { document.body.removeChild(overlay); };
+      
+      let btnYes = document.createElement('button'); btnYes.style.cssText = 'flex:1; background:var(--danger); color:white; border:none; padding:10px; border-radius:8px; font-family:"Dangrek"; font-size:16px; cursor:pointer; transition: transform 0.1s;'; 
+      btnYes.onmousedown = () => btnYes.style.transform = "scale(0.95)"; btnYes.onmouseup = () => btnYes.style.transform = "scale(1)";
+      btnYes.innerText = 'យល់ព្រម'; btnYes.onclick = function() { document.body.removeChild(overlay); if(callback) callback(); };
+      
+      let btnNo = document.createElement('button'); btnNo.style.cssText = 'flex:1; background:#6c757d; color:white; border:none; padding:10px; border-radius:8px; font-family:"Dangrek"; font-size:16px; cursor:pointer; transition: transform 0.1s;'; 
+      btnNo.onmousedown = () => btnNo.style.transform = "scale(0.95)"; btnNo.onmouseup = () => btnNo.style.transform = "scale(1)";
+      btnNo.innerText = 'បោះបង់'; btnNo.onclick = function() { document.body.removeChild(overlay); };
+      
       btnGroup.appendChild(btnNo); btnGroup.appendChild(btnYes); box.appendChild(btnGroup); overlay.appendChild(box); document.body.appendChild(overlay);
     }
 
