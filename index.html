@@ -137,7 +137,7 @@
     }
 
     #mobile-cart-btn { 
-      display: flex; justify-content: center; align-items: center;
+      display: none; justify-content: center; align-items: center;
       position: fixed; top: 15px; right: 15px; z-index: 99990; 
       background: white; color: var(--primary); border: 2px solid var(--primary); 
       width: 52px; height: 50px; font-size: 20px; border-radius: 8px; 
@@ -161,7 +161,7 @@
     
     @media (max-width: 900px) {
       /* ដក !important ចេញពី mobile-cart-btn ដើម្បីឱ្យ JS អាចបញ្ជាលាក់វាបាន */
-      #hamburger-btn { display: flex !important; justify-content: center; align-items: center; }
+      #hamburger-btn { justify-content: center; align-items: center; }
       #mobile-cart-btn { justify-content: center; align-items: center; }
       
       .sidebar { position: fixed; z-index: 99999; height: 100%; transform: translateX(-100%); transition: transform 0.3s ease; }
@@ -456,13 +456,18 @@
           localStorage.removeItem('ptas_role'); 
           document.getElementById('app-sidebar').style.display = 'none'; 
           document.getElementById('view-order').style.display = 'none'; 
+          
+          // បន្ថែមកូដ ២ បន្ទាត់នេះដើម្បីលាក់ប៊ូតុងទាំង ២ ពេលចេញមកក្រៅវិញ
+          document.getElementById('hamburger-btn').style.display = 'none'; 
+          document.getElementById('mobile-cart-btn').style.display = 'none'; 
+          
           showLoginScreen(); 
       }); 
     }
 
     function buildAppUI(role) {
       document.getElementById('app-sidebar').style.display = 'flex'; 
-      document.getElementById('hamburger-btn').style.display = 'block'; 
+      document.getElementById('hamburger-btn').style.display = 'flex'; // ដូរពី block មក flex វិញដើម្បីឱ្យ icon ចំកណ្តាល
       document.getElementById('view-order').style.display = 'flex'; 
       if (role === 'manager') document.getElementById('btn-report').style.display = 'block';
       currentCat = Object.keys(MENU_DB)[0]; let tabsHtml = ''; 
@@ -471,7 +476,7 @@
       let savedCart = localStorage.getItem('ptas_cart'); let savedTable = localStorage.getItem('ptas_table'); let savedEditing = localStorage.getItem('ptas_editing');
       if (savedCart) { cart = JSON.parse(savedCart); if (savedTable) document.getElementById('table-no').value = savedTable; if (savedEditing) currentEditingInv = savedEditing; updateCart(); }
       
-      switchView('order'); // ធានាថាកន្ត្រកបង្ហាញត្រឹមត្រូវពេល Login រួច
+      switchView('order'); 
     }
 
     function switchView(view) { 
