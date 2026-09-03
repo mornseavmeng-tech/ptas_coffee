@@ -8,8 +8,11 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    /* @import ត្រូវតែនៅជួរលើគេបង្អស់ជានិច្ច ទើប Browser អាន Font */
     @import url('https://fonts.googleapis.com/css2?family=Dangrek&family=Koulen&display=swap');
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    @keyframes wave { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-12px); } }
     
     * { touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; }
     
@@ -29,8 +32,6 @@
     .wave-dots span:nth-child(2) { animation-delay: 0.2s; }
     .wave-dots span:nth-child(3) { animation-delay: 0.4s; }
     .wave-dots span:nth-child(4) { animation-delay: 0.6s; }
-    @keyframes wave { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-12px); } }
-    @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
     .sidebar { width: 220px; background: var(--primary); color: white; display: flex; flex-direction: column; padding: 20px 0 20px 15px; box-sizing: border-box; overflow-y: auto; scrollbar-width: none; }
     .sidebar::-webkit-scrollbar { display: none; }
@@ -307,10 +308,12 @@
     </div>
   </div>
 
- <div class="main-content" id="view-expense" style="display:none; justify-content:center; align-items:center; position:relative; background-color: #ebf1f6;">
-    <button onclick="toggleExpenseDrawer()" style="position:absolute; top:20px; right:20px; background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-family:'Dangrek'; font-size:16px; display:flex; align-items:center; gap:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
-      <i class="fa-solid fa-clock-rotate-left"></i> មើលប្រវត្តិចំណាយ
-    </button>
+ <div class="main-content" id="view-expense" style="display:none; flex-direction:column; justify-content:center; align-items:center; background-color: #ebf1f6;">
+    <div style="width:100%; max-width:450px; display:flex; justify-content:flex-end; margin-bottom:15px;">
+      <button onclick="toggleExpenseDrawer()" style="background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-family:'Dangrek'; font-size:16px; display:flex; align-items:center; gap:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+        <i class="fa-solid fa-clock-rotate-left"></i> មើលប្រវត្តិចំណាយ
+      </button>
+    </div>
     <div class="form-box">
       <h2 style="text-align:center; margin-top:0; color:#333;"><i class="fa-solid fa-receipt" style="color:#28a745; margin-right:10px;"></i>កត់ត្រាចំណាយ</h2>
       <label>ឈ្មោះចំណាយ (ឧ. ទិញទឹកកក)៖</label>
@@ -360,12 +363,12 @@
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbxKfvs9Hpas32ZdNC2FPRdhlSK-7fuOHcSIrFMt2ykwPUavfsb-Q5mdje8jQTQNNRcQ/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbwvUsG-6tQYu9nb7hFME1rX5DC2_c6IKyHoAfa-TwCEazA3jYDMd4uQuV_c39fmRHyQ/exec";
+    const API_SECRET = "PTAS_SECURE_POS_2026"; // បន្ថែមសោសម្ងាត់
 
     let MENU_DB = {}; let PROMO_DB = {}; let UNPAID_DB = []; let HISTORY_DB = []; let EXPENSE_DB = []; let ALL_HISTORY = [];
     let cart = []; let currentCat = ""; let appliedPromo = null; let currentEditingInv = null; let currentHistFilter = 'all';
     
-    const MANAGER_PIN = "9999"; const STAFF_PIN = "1234";
     const BANKS = [
       { name: 'ABA', color: '#005e7a', image: 'https://i.postimg.cc/gkfVhHn4/aba.jpg' }, { name: 'អេស៊ីលីដា', color: '#143c6d', image: 'https://i.postimg.cc/rpT5nyGb/ac.png' },
       { name: 'វឌ្ឍនៈ', color: '#013bc2', image: 'https://i.postimg.cc/NGnmhk71/vattanak.png' }, { name: 'ស្ថាបនា', color: '#093b80', image: 'https://i.postimg.cc/J0SkbR4k/sathapana.png' },
@@ -402,6 +405,7 @@
     }
 
     async function sendDataToCloud(payload, loadingMsg) {
+      payload.secret = API_SECRET; // បញ្ចូលសោសម្ងាត់ទៅគ្រប់ Request
       let loadingOverlay = document.getElementById('loading-overlay');
       let loadingText = document.getElementById('loading-text');
       loadingText.innerText = loadingMsg || "កំពុងដំណើរការ...";
@@ -434,7 +438,19 @@
 
     window.onload = async function() {
       try {
-        let res = await fetch(API_URL); let data = await res.json();
+        // បន្ថែមសោសម្ងាត់ពេលទាញយកទិន្នន័យដំបូង
+        let res = await fetch(API_URL, {
+            method: 'POST', 
+            headers: {'Content-Type': 'text/plain;charset=utf-8'},
+            body: JSON.stringify({ action: 'init', secret: API_SECRET })
+        }); 
+        let data = await res.json();
+        
+        if(data.status === "error") {
+            showCustomAlert(data.message);
+            return;
+        }
+
         MENU_DB = data.menuData || {}; PROMO_DB = data.promoData || {}; UNPAID_DB = data.unpaidData || []; HISTORY_DB = data.historyData || []; EXPENSE_DB = data.expenseData || [];
         
         let todayDate = getFormattedDate();
@@ -454,12 +470,43 @@
     };
 
     function initAuth() { let userRole = localStorage.getItem('ptas_role'); if (!userRole) { showLoginScreen(); } else { buildAppUI(userRole); } }
+    
     function showLoginScreen() {
       let loginDiv = document.createElement('div'); loginDiv.id = 'login-screen'; loginDiv.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:var(--bg); display:flex; justify-content:center; align-items:center; z-index:9999; flex-direction:column;';
       loginDiv.innerHTML = `<div style="background:white; padding:40px; border-radius:15px; box-shadow:0 4px 15px rgba(0,0,0,0.1); text-align:center;"><img src="https://i.postimg.cc/Y9qXGCT1/3-(2).png" style="width:100px; margin-bottom:20px;"><h2 style="font-family:'Dangrek'; color:var(--text); margin-bottom:20px;">សូមបញ្ចូលលេខកូដសម្ងាត់</h2><input type="password" id="pin-input" onkeypress="if(event.key === 'Enter') checkPin()" style="padding:15px; font-size:24px; text-align:center; border-radius:8px; border:1px solid var(--border); width:200px; margin-bottom:15px; font-family:Arial; letter-spacing: 5px;" placeholder="****"><br><button onclick="checkPin()" style="background:var(--primary); color:white; border:none; padding:12px 40px; font-size:18px; border-radius:8px; font-family:'Dangrek'; cursor:pointer; width: 100%; box-sizing: border-box;">ចូលប្រព័ន្ធ (Login)</button></div>`;
       document.body.appendChild(loginDiv);
     }
-    function checkPin() { let pin = document.getElementById('pin-input').value; if (pin === MANAGER_PIN) { localStorage.setItem('ptas_role', 'manager'); document.getElementById('login-screen').remove(); buildAppUI('manager'); } else if (pin === STAFF_PIN) { localStorage.setItem('ptas_role', 'staff'); document.getElementById('login-screen').remove(); buildAppUI('staff'); } else { showCustomAlert("❌ លេខកូដមិនត្រឹមត្រូវទេ!"); } }
+
+    // មុខងារ Login ថ្មី (បាញ់ទៅសួរ Server)
+    async function checkPin() { 
+      let pinInput = document.getElementById('pin-input').value; 
+      if (!pinInput) return;
+      
+      let loadingOverlay = document.getElementById('loading-overlay');
+      document.getElementById('loading-text').innerText = "កំពុងផ្ទៀងផ្ទាត់គណនី...";
+      loadingOverlay.style.display = 'flex';
+
+      try {
+        let res = await fetch(API_URL, { 
+           method: 'POST', 
+           headers: {'Content-Type': 'text/plain;charset=utf-8'}, 
+           body: JSON.stringify({ action: 'login', secret: API_SECRET, pin: pinInput }) 
+        });
+        let result = await res.json();
+        loadingOverlay.style.display = 'none';
+
+        if(result.status === 'success') {
+           localStorage.setItem('ptas_role', result.role); 
+           document.getElementById('login-screen').remove(); 
+           buildAppUI(result.role);
+        } else {
+           showCustomAlert("❌ " + result.message);
+        }
+      } catch (e) {
+        loadingOverlay.style.display = 'none';
+        showCustomAlert("❌ បរាជ័យក្នុងការតភ្ជាប់ទៅកាន់ប្រព័ន្ធ!");
+      }
+    }
     
     function logout() { 
       if(window.innerWidth <= 900) {
