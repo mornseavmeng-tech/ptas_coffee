@@ -185,13 +185,13 @@
       .hist-left-pane { flex: none; height: auto; border-right: none; border-bottom: 2px solid var(--border); padding-bottom: 20px; }
       .hist-right-pane { flex: 1; padding: 20px 0; }
 
-      /* ផ្ទាំងប្រវត្តិលម្អិត លោតពេញអេក្រង់ដាច់ដោយឡែក (សម្រាប់តែផ្ទាំង History ប៉ុណ្ណោះ) */
-      #history-details-pane {
+      /* ផ្ទាំងប្រវត្តិលម្អិត និងផ្ទាំងទូទាត់លុយ លោតពេញអេក្រង់ដាច់ដោយឡែក */
+      #history-details-pane, #checkout-right-pane {
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg);
         z-index: 99999; transform: translateX(100%); transition: transform 0.3s ease;
         padding: 20px; box-sizing: border-box; overflow-y: auto;
       }
-      #history-details-pane.active { transform: translateX(0); }
+      #history-details-pane.active, #checkout-right-pane.active { transform: translateX(0); }
     }
 
     @media (min-width: 901px) {
@@ -202,7 +202,7 @@
   </style>
 </head>
 <body>
-  <div id="loading-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:999999; flex-direction:column; justify-content:center; align-items:center; color:white;">
+  <div id="loading-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:9999999; flex-direction:column; justify-content:center; align-items:center; color:white;">
     <div class="wave-dots" style="margin-bottom:15px;"><span></span><span></span><span></span><span></span></div>
     <h2 id="loading-text" style="font-family:'Dangrek'; margin:0; font-size:24px; font-weight:normal; letter-spacing:1px;">កំពុងដំណើរការ...</h2>
   </div>
@@ -473,7 +473,6 @@
           document.getElementById('app-sidebar').style.display = 'none'; 
           document.getElementById('view-order').style.display = 'none'; 
           
-          // បន្ថែមកូដ ២ បន្ទាត់នេះដើម្បីលាក់ប៊ូតុងទាំង ២ ពេលចេញមកក្រៅវិញ
           document.getElementById('hamburger-btn').style.display = 'none'; 
           document.getElementById('mobile-cart-btn').style.display = 'none'; 
           
@@ -483,7 +482,7 @@
 
     function buildAppUI(role) {
       document.getElementById('app-sidebar').style.display = 'flex'; 
-      document.getElementById('hamburger-btn').style.display = 'flex'; // ដូរពី block មក flex វិញដើម្បីឱ្យ icon ចំកណ្តាល
+      document.getElementById('hamburger-btn').style.display = 'flex'; 
       document.getElementById('view-order').style.display = 'flex'; 
       if (role === 'manager') document.getElementById('btn-report').style.display = 'block';
       currentCat = Object.keys(MENU_DB)[0]; let tabsHtml = ''; 
@@ -504,14 +503,12 @@
         if(el) el.style.display = v===view ? 'flex' : 'none'; 
       }); 
       
-      // បិទ Auto-Close រាល់ Popup ឬ Drawer ដែលកំពុងបើកចោល
       document.getElementById('cart-overlay')?.classList.remove('active');
       document.querySelector('.cart-section')?.classList.remove('active');
       document.getElementById('expense-drawer')?.classList.remove('active');
       document.getElementById('history-details-pane')?.classList.remove('active');
       document.getElementById('hist-dropdown').style.display = 'none';
 
-      // បង្ហាញ ឬ លាក់ប៊ូតុងកន្ត្រកអណ្តែត តាមទីតាំង
       let mobileCartBtn = document.getElementById('mobile-cart-btn');
       if (mobileCartBtn) {
          if (view === 'order') mobileCartBtn.style.display = 'flex';
@@ -583,9 +580,34 @@
       let sub = cart.reduce((s, i) => s + (i.price * i.qty), 0); 
       document.getElementById('checkout-total').innerText = calcTotal(sub) + '៛'; 
       switchView('checkout'); 
-      selectPayMethod('cash');
       document.querySelector('.cart-section')?.classList.remove('active');
       document.getElementById('cart-overlay')?.classList.remove('active');
+    }
+
+    function closeCheckoutDetails() {
+       document.getElementById('checkout-right-pane').classList.remove('active');
+    }
+
+    function selectPayMethod(type) { 
+        let rightPane = document.getElementById('checkout-right-pane'); let finalTotal = parseInt(document.getElementById('final-total').innerText); 
+        let banksHtml = BANKS.map(b => `<button class="pay-btn" style="background-color: ${b.color}; color: white; padding: 10px; display: flex; justify-content: center; align-items: center; height: 55px;" onclick="processFinalCheckout('QR - ${b.name}')"><img src="${b.image}" alt="${b.name}" style="max-height: 35px; max-width: 100%;"></button>`).join(''); 
+        let mixBanksHtml = BANKS.map(b => `<button class="pay-btn" style="background-color: ${b.color}; color: white; padding: 10px; display: flex; justify-content: center; align-items: center; height: 55px;" onclick="processFinalCheckout('Mix QR - ${b.name}', document.getElementById('mix-cash-input').value, ${finalTotal} - document.getElementById('mix-cash-input').value)"><img src="${b.image}" alt="${b.name}" style="max-height: 35px; max-width: 100%;"></button>`).join(''); 
+        
+        let closeBtnHtml = window.innerWidth <= 900 ? `<div style="margin-bottom:20px; display:flex; justify-content:flex-start;"><button onclick="closeCheckoutDetails()" style="background:var(--danger); color:white; border:none; padding:8px 15px; border-radius:8px; font-family:'Dangrek'; font-size:16px; cursor:pointer; transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'"><i class="fa-solid fa-xmark"></i> ត្រឡប់ក្រោយ</button></div>` : '';
+
+        if(type === 'cash') { 
+            rightPane.innerHTML = `${closeBtnHtml}<h2 style="text-align:center;">លុយក្រៅ</h2><h3 style="text-align:center; margin-top:50px;">បញ្ជាក់ការបង់លុយ</h3><div style="display:flex; justify-content:center; gap:10px; margin-top:30px;"><button class="pay-btn" style="background:#6c757d; width:100px;" onclick="closeCheckoutDetails()">បោះបង់</button><button class="pay-btn" style="background:var(--primary); width:100px;" onclick="processFinalCheckout('លុយក្រៅសុទ្ធ')">យល់ព្រម</button></div>`; 
+        } 
+        else if (type === 'qr') { 
+            rightPane.innerHTML = `${closeBtnHtml}<h2>QR</h2><div class="bank-grid">${banksHtml}</div>`; 
+        } 
+        else if (type === 'mix') { 
+            rightPane.innerHTML = `${closeBtnHtml}<h2>លុយក្រៅ & QR</h2><input type="number" id="mix-cash-input" placeholder="បញ្ចូលទឹកប្រាក់លុយក្រៅ..." style="width:100%; padding:10px; font-size:16px; border:1px solid var(--border); border-radius:8px; margin-bottom:15px;" onkeyup="calcCheckoutMix(${finalTotal})"><p style="color:var(--danger); font-size:18px; font-weight:bold;">ខ្វះ: <span id="mix-remain-text">${finalTotal}៛</span></p><div class="bank-grid" id="mix-banks-container" style="display:none;">${mixBanksHtml}</div>`; 
+        } 
+        
+        if(window.innerWidth <= 900) {
+            rightPane.classList.add('active');
+        }
     }
 
     function applyPromo() { let codeInput = document.getElementById('promo-code'); let code = codeInput.value.toUpperCase(); let statusText = document.getElementById('promo-status'); let sub = cart.reduce((s, i) => s + (i.price * i.qty), 0); if (!code) { statusText.innerHTML = "<span style='color: var(--danger);'>⚠️ សូមបញ្ចូលលេខកូដសិន!</span>"; setTimeout(() => { if(!appliedPromo) statusText.innerHTML = ''; }, 3000); return; } if (PROMO_DB[code] && sub >= PROMO_DB[code].min_spend) { appliedPromo = { code: code, val: PROMO_DB[code].discount_percent }; codeInput.value = ''; calcTotal(sub); renderPromoUI(); } else { appliedPromo = null; renderPromoUI(); statusText.innerHTML = "<span style='color: var(--danger);'>❌ កូដខុស ឬទិញមិនទាន់គ្រប់លក្ខខណ្ឌ!</span>"; calcTotal(sub); setTimeout(() => { if(!appliedPromo) statusText.innerHTML = ''; }, 3000); } }
@@ -593,15 +615,6 @@
     function renderPromoUI() { let promoRow = document.querySelector('.promo-row'); let statusText = document.getElementById('promo-status'); if (appliedPromo) { promoRow.style.display = 'none'; statusText.style.height = 'auto'; statusText.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(40,167,69,0.1); padding:8px 12px; border-radius:8px; border:1px solid #28a745;"><span style="color:#28a745;">✅ ប្រើកូដ: <b>${appliedPromo.code}</b></span><span style="cursor:pointer; color:var(--danger); font-size:14px; background:white; padding:4px 10px; border-radius:5px; border:1px solid var(--danger);" onclick="removePromo()">✖️ លុប</span></div>`; } else { promoRow.style.display = 'flex'; statusText.style.height = '18px'; } }
     function calcTotal(sub) { if (appliedPromo && PROMO_DB[appliedPromo.code] && sub < PROMO_DB[appliedPromo.code].min_spend) { appliedPromo = null; if(typeof renderPromoUI === 'function') renderPromoUI(); } let dis = appliedPromo ? sub * appliedPromo.val : 0; let final = sub - dis; document.getElementById('discount-amt').innerText = '-' + dis + '៛'; document.getElementById('final-total').innerText = final + '៛'; return final; }
 
-    function selectPayMethod(type) { 
-        let rightPane = document.getElementById('checkout-right-pane'); let finalTotal = parseInt(document.getElementById('final-total').innerText); 
-        let banksHtml = BANKS.map(b => `<button class="pay-btn" style="background-color: ${b.color}; color: white; padding: 10px; display: flex; justify-content: center; align-items: center; height: 55px;" onclick="processFinalCheckout('QR - ${b.name}')"><img src="${b.image}" alt="${b.name}" style="max-height: 35px; max-width: 100%;"></button>`).join(''); 
-        let mixBanksHtml = BANKS.map(b => `<button class="pay-btn" style="background-color: ${b.color}; color: white; padding: 10px; display: flex; justify-content: center; align-items: center; height: 55px;" onclick="processFinalCheckout('Mix QR - ${b.name}', document.getElementById('mix-cash-input').value, ${finalTotal} - document.getElementById('mix-cash-input').value)"><img src="${b.image}" alt="${b.name}" style="max-height: 35px; max-width: 100%;"></button>`).join(''); 
-        
-        if(type === 'cash') { rightPane.innerHTML = `<h2 style="text-align:center;">លុយក្រៅ</h2><h3 style="text-align:center; margin-top:50px;">បញ្ជាក់ការបង់លុយ</h3><div style="display:flex; justify-content:center; gap:10px; margin-top:30px;"><button class="pay-btn" style="background:#6c757d; width:100px;" onclick="switchView('order')">បោះបង់</button><button class="pay-btn" style="background:var(--primary); width:100px;" onclick="processFinalCheckout('លុយក្រៅសុទ្ធ')">យល់ព្រម</button></div>`; } 
-        else if (type === 'qr') { rightPane.innerHTML = `<h2>QR</h2><div class="bank-grid">${banksHtml}</div>`; } 
-        else if (type === 'mix') { rightPane.innerHTML = `<h2>លុយក្រៅ & QR</h2><input type="number" id="mix-cash-input" placeholder="បញ្ចូលទឹកប្រាក់លុយក្រៅ..." style="width:100%; padding:10px; font-size:16px; border:1px solid var(--border); border-radius:8px; margin-bottom:15px;" onkeyup="calcCheckoutMix(${finalTotal})"><p style="color:var(--danger); font-size:18px; font-weight:bold;">ខ្វះ: <span id="mix-remain-text">${finalTotal}៛</span></p><div class="bank-grid" id="mix-banks-container" style="display:none;">${mixBanksHtml}</div>`; } 
-    }
     function calcCheckoutMix(finalTotal) { let inputVal = document.getElementById('mix-cash-input').value; let cash = Number(inputVal); let remain = finalTotal - cash; let remainText = document.getElementById('mix-remain-text'); let mixBanks = document.getElementById('mix-banks-container'); if (inputVal === '' || cash <= 0) { remainText.innerText = finalTotal + '៛'; mixBanks.style.display = 'none'; } else if (remain > 0) { remainText.innerText = remain + '៛'; mixBanks.style.display = 'grid'; } else { selectPayMethod('cash'); } }
 
     function processFinalCheckout(method, mixCash, mixQr) {
@@ -615,6 +628,9 @@
       else { let existingInv = ALL_HISTORY.find(x => x.inv === targetInvNo); if (existingInv) { existingInv.items = JSON.parse(JSON.stringify(cart)); existingInv.totalRiel = finalTotal; existingInv.method = method; existingInv.mixCash = mCash; existingInv.mixQr = mQr; existingInv.table = tableNo; existingInv.time = currentTime; existingInv.status = method === 'មិនទាន់ទូទាត់' ? 'មិនទាន់ទូទាត់' : 'បានទូទាត់'; } }
       
       let payload = { action: "order", invNo: targetInvNo, table: tableNo, items: cart, subTotal: sub, discountAmount: appliedPromo ? sub * appliedPromo.val : 0, promoCode: appliedPromo ? appliedPromo.code : "គ្មាន", finalTotal: finalTotal, method: method, mixCash: mCash, mixQr: mQr };
+      
+      document.getElementById('checkout-right-pane').classList.remove('active');
+      
       currentHistFilter = 'all'; renderHistoryList(); cart = []; currentEditingInv = null; localStorage.removeItem('ptas_cart'); localStorage.removeItem('ptas_table'); localStorage.removeItem('ptas_editing'); appliedPromo = null; renderPromoUI(); updateCart(); switchView('order');
       sendDataToCloud(payload, method === 'មិនទាន់ទូទាត់' ? "កំពុងរក្សាទុកបុងជំពាក់..." : "កំពុងដំណើរការទូទាត់ប្រាក់...");
     }
@@ -677,7 +693,7 @@
       
       let mCash = inv.mixCash || 0;
       let mQr = inv.mixQr || 0;
-      let closeBtnMobile = window.innerWidth <= 900 ? `<div style="margin-bottom:15px;"><button onclick="closeHistDetails()" style="background:var(--danger); color:white; border:none; padding:10px 15px; border-radius:8px; font-family:'Dangrek'; font-size:16px; cursor:pointer;"><i class="fa-solid fa-xmark"></i> បិទផ្ទាំងនេះ</button></div>` : '';
+      let closeBtnMobile = window.innerWidth <= 900 ? `<div style="margin-bottom:15px; display:flex; justify-content:flex-start;"><button onclick="closeHistDetails()" style="background:var(--danger); color:white; border:none; padding:8px 15px; border-radius:8px; font-family:'Dangrek'; font-size:16px; cursor:pointer; transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'"><i class="fa-solid fa-xmark"></i> ត្រឡប់ក្រោយ</button></div>` : '';
       
       let rightPane = `
         ${closeBtnMobile}
@@ -743,12 +759,11 @@
     }
 
     function renderCloseShiftSummary(data) {
-       // គណនាលុយសល់ និងចំណាយ ដោយស្វ័យប្រវត្តិ
        let totalExpense = EXPENSE_DB.reduce((s, ex) => s + ex.amount, 0);
        let cashInHand = data.cashTotal + data.mixCashTotal;
-       let netCash = cashInHand - totalExpense; // (លុយក្រៅ + លុយក្រៅMix) - ចំណាយ = សាច់ប្រាក់សល់ក្នុងថត
+       let netCash = cashInHand - totalExpense; 
        let totalQR = data.qrTotal + data.mixQrTotal;
-       let grandTotal = cashInHand + totalQR; // សរុបប្រាក់ចំណូលលក់បាន
+       let grandTotal = cashInHand + totalQR; 
 
        let html = `
          <div style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #7c98b6;">
